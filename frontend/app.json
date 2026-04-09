@@ -1,0 +1,11 @@
+{
+  "pages": [
+    "pages/ai/ai"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#DC143C",
+    "navigationBarTitleText": "民族团结促进法学习",
+    "navigationBarTextStyle": "white"
+  }
+}
