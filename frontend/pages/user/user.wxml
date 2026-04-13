@@ -1,0 +1,33 @@
+<view class="container">
+  <view class="user-header">
+    <image class="avatar" src="{{userInfo.avatar || '/images/default-avatar.png'}}" mode="aspectFill"></image>
+    <view class="user-info">
+      <text class="nickname">{{userInfo.nickname || '未登录'}}</text>
+      <text class="username">{{userInfo.username}}</text>
+    </view>
+  </view>
+
+  <view class="menu-list">
+    <view class="menu-item">
+      <text class="menu-icon">📊</text>
+      <text class="menu-text">学习记录</text>
+      <text class="menu-arrow" open-type="navigate" url="/pages/study/study">></text>
+    </view>
+    <view class="menu-item">
+      <text class="menu-icon">📒</text>
+      <text class="menu-text">我的笔记</text>
+      <text class="menu-arrow" open-type="navigate" url="/pages/note/note">></text>
+    </view>
+    <view class="menu-item">
+      <text class="menu-icon">❌</text>
+      <text class="menu-text">错题本</text>
+      <text class="menu-arrow" open-type="navigate" url="/pages/wrong/wrong">></text>
+    </view>
+    <view class="menu-item">
+      <text class="menu-icon">📋</text>
+      <text class="menu-text">考试历史</text>
+    </view>
+  </view>
+
+  <button class="logout-btn" bindtap="logout">退出登录</button>
+</view>

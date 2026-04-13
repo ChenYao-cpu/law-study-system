@@ -1,0 +1,40 @@
+<view class="container">
+  <view class="progress-bar">
+    <view class="progress-text">{{currentIndex + 1}} / {{questions.length}}</view>
+    <view class="progress-line">
+      <view class="progress-fill" style="width: {{(currentIndex + 1) / questions.length * 100}}%"></view>
+    </view>
+  </view>
+
+  <view class="question-card" wx:if="{{questions[currentIndex]}}">
+    <view class="question-type">
+      {{questions[currentIndex].type === 1 ? '单选题' : questions[currentIndex].type === 2 ? '多选题' : '判断题'}}
+    </view>
+    
+    <view class="question-title">{{questions[currentIndex].title}}</view>
+
+    <view class="options">
+      <view class="option {{userAnswer === item.key ? 'selected' : ''}} {{showResult && item.key === questions[currentIndex].answer ? 'correct' : ''}} {{showResult && userAnswer === item.key && !isCorrect ? 'wrong' : ''}}"
+            wx:for="{{questions[currentIndex].options}}" wx:key="key"
+            data-answer="{{item.key}}" bindtap="selectAnswer">
+        <text class="option-key">{{item.key}}.</text>
+        <text class="option-value">{{item.value}}</text>
+      </view>
+    </view>
+
+    <view class="result" wx:if="{{showResult}}">
+      <view class="result-text {{isCorrect ? 'correct' : 'wrong'}}">
+        {{isCorrect ? '✓ 回答正确' : '✗ 回答错误'}}
+      </view>
+      <view class="analysis" wx:if="{{questions[currentIndex].analysis}}">
+        <text class="analysis-title">解析：</text>
+        <text>{{questions[currentIndex].analysis}}</text>
+      </view>
+    </view>
+
+    <button class="submit-btn" wx:if="{{!showResult}}" bindtap="submitAnswer">提交答案</button>
+    <button class="next-btn" wx:if="{{showResult}}" bindtap="nextQuestion">
+      {{currentIndex < questions.length - 1 ? '下一题' : '查看结果'}}
+    </button>
+  </view>
+</view>

@@ -1,0 +1,20 @@
+<view class="container">
+  <view class="empty" wx:if="{{wrongList.length === 0 && !loading}}">
+    <text class="empty-icon">🎉</text>
+    <text class="empty-text">暂无错题，继续保持！</text>
+  </view>
+
+  <view class="wrong-list" wx:else>
+    <view class="wrong-item" wx:for="{{wrongList}}" wx:key="id">
+      <view class="wrong-header">
+        <text class="wrong-type">{{item.type === 1 ? '单选' : item.type === 2 ? '多选' : '判断'}}</text>
+        <text class="wrong-count">错误次数：{{item.wrongCount}}</text>
+      </view>
+      <view class="wrong-title">{{item.title}}</view>
+      <view class="wrong-footer">
+        <text class="wrong-time">{{item.lastWrongTime}}</text>
+        <text class="remove-btn" data-id="{{item.questionId}}" bindtap="removeWrong">移除</text>
+      </view>
+    </view>
+  </view>
+</view>

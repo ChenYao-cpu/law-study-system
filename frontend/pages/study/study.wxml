@@ -1,0 +1,39 @@
+<view class="container">
+  <view class="stats-card">
+    <view class="stat-row">
+      <view class="stat-item">
+        <text class="stat-value">{{overview.totalDuration || 0}}</text>
+        <text class="stat-label">总学习时长(分钟)</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-value">{{overview.studyDays || 0}}</text>
+        <text class="stat-label">连续学习天数</text>
+      </view>
+    </view>
+    <view class="stat-row">
+      <view class="stat-item">
+        <text class="stat-value">{{overview.completedCourses || 0}}</text>
+        <text class="stat-label">完成课程数</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-value">{{overview.totalScore || 0}}</text>
+        <text class="stat-label">总积分</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="section-title">课程进度</view>
+    <view class="progress-list">
+      <view class="progress-item" wx:for="{{progressList}}" wx:key="id">
+        <view class="progress-header">
+          <text class="course-name">{{item.courseTitle}}</text>
+          <text class="progress-percent">{{item.progress}}%</text>
+        </view>
+        <view class="progress-bar">
+          <view class="progress-fill" style="width: {{item.progress}}%"></view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

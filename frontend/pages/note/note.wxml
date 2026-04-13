@@ -1,0 +1,36 @@
+<view class="container">
+  <view class="note-list" wx:if="{{notes.length > 0}}">
+    <view class="note-item" wx:for="{{notes}}" wx:key="id">
+      <view class="note-header">
+        <text class="note-title">{{item.title}}</text>
+        <view class="note-actions">
+          <text class="action-btn" data-note="{{item}}" bindtap="showEditNote">编辑</text>
+          <text class="action-btn delete" data-id="{{item.id}}" bindtap="deleteNote">删除</text>
+        </view>
+      </view>
+      <view class="note-content">{{item.content}}</view>
+      <view class="note-time">{{item.createTime}}</view>
+    </view>
+  </view>
+
+  <view class="empty" wx:else>
+    <text class="empty-text">暂无笔记，点击右上角添加</text>
+  </view>
+
+  <view class="add-btn" bindtap="showAddNote">+</view>
+
+  <view class="edit-modal" wx:if="{{showEdit}}">
+    <view class="modal-mask" bindtap="hideEdit"></view>
+    <view class="modal-content">
+      <view class="modal-header">
+        <text class="modal-title">{{editNote ? '编辑笔记' : '新建笔记'}}</text>
+        <text class="modal-close" bindtap="hideEdit">×</text>
+      </view>
+
+      <input class="input-title" placeholder="标题" value="{{title}}" bindinput="onTitleInput" />
+      <textarea class="input-content" placeholder="笔记内容" value="{{content}}" bindinput="onContentInput" maxlength="-1"></textarea>
+
+      <button class="save-btn" bindtap="saveNote">保存</button>
+    </view>
+  </view>
+</view>

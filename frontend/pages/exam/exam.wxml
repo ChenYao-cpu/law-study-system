@@ -1,0 +1,30 @@
+<view class="container">
+  <view class="exam-header">
+    <view class="timer">⏱ {{formatTime(timeLeft)}}</view>
+    <view class="progress">{{currentIndex + 1}}/{{questions.length}}</view>
+  </view>
+
+  <view class="question-card" wx:if="{{questions[currentIndex]}}">
+    <view class="question-type">
+      {{questions[currentIndex].type === 1 ? '单选题' : questions[currentIndex].type === 2 ? '多选题' : '判断题'}}
+    </view>
+
+    <view class="question-title">{{questions[currentIndex].title}}</view>
+
+    <view class="options">
+      <view class="option {{answers[questions[currentIndex].id] === item.key ? 'selected' : ''}}"
+            wx:for="{{questions[currentIndex].options}}" wx:key="key"
+            data-question-id="{{questions[currentIndex].id}}"
+            data-answer="{{item.key}}" bindtap="selectAnswer">
+        <text class="option-key">{{item.key}}.</text>
+        <text class="option-value">{{item.value}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="footer">
+    <button class="nav-btn" bindtap="prevQuestion" disabled="{{currentIndex === 0}}">上一题</button>
+    <button class="nav-btn" bindtap="nextQuestion" disabled="{{currentIndex === questions.length - 1}}">下一题</button>
+    <button class="submit-btn" bindtap="submitExam">交卷</button>
+  </view>
+</view>

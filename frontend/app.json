@@ -1,5 +1,15 @@
 {
   "pages": [
+    "pages/index/index",
+    "pages/login/login",
+    "pages/user/user",
+    "pages/question/question",
+    "pages/wrong/wrong",
+    "pages/exam/exam",
+    "pages/notice/notice",
+    "pages/study/study",
+    "pages/course/course",
+    "pages/note/note",
     "pages/ai/ai"
   ],
   "window": {
@@ -7,5 +17,24 @@
     "navigationBarBackgroundColor": "#DC143C",
     "navigationBarTitleText": "民族团结促进法学习",
     "navigationBarTextStyle": "white"
+  },
+  "tabBar": {
+    "color": "#999999",
+    "selectedColor": "#DC143C",
+    "backgroundColor": "#ffffff",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/study/study",
+        "text": "学习"
+      },
+      {
+        "pagePath": "pages/user/user",
+        "text": "我的"
+      }
+    ]
   }
 }
