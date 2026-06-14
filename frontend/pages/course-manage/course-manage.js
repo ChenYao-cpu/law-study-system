@@ -22,6 +22,8 @@ Page({
 
     onShow() { this.loadData() },
 
+    goBack() { wx.navigateBack() },
+
     async loadData() {
         this.setData({ loading: true })
         try {
