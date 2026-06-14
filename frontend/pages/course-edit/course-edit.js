@@ -18,6 +18,8 @@ Page({
         submitting: false
     },
 
+    goBack() { wx.navigateBack() },
+
     onLoad(options) {
         if (options.id) {
             this.setData({ mode: 'edit', courseId: options.id })
