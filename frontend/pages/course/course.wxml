@@ -67,13 +67,13 @@
     <!-- 视频播放器 -->
     <video
             id="courseVideo"
-            class="video-player {{isFullScreen ? 'fullscreen' : ''}}"
+            class="video-player"
             src="{{currentCourse.videoUrl}}"
-            controls="{{true}}"
             show-fullscreen-btn="{{true}}"
             show-center-play-btn="{{true}}"
+            show-play-btn="{{true}}"
             enable-progress-gesture="{{canDrag}}"
-            direction="{{90}}"
+            object-fit="contain"
             bindfullscreenchange="onFullScreenChange"
             bindplay="videoPlay"
             bindpause="videoPause"

@@ -316,14 +316,6 @@ page {
   z-index: 199;
 }
 
-.video-player.fullscreen {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: 999;
-}
 
 /* 视频导航栏 */
 .video-nav-header {
