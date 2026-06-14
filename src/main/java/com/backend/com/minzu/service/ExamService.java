@@ -1,7 +1,8 @@
-package com.minzu.service;
+package com.backend.com.minzu.service;
 
-import com.minzu.entity.Exam;
-import com.minzu.entity.Question;
+import com.backend.com.minzu.entity.Exam;
+import com.backend.com.minzu.entity.Question;
+
 import java.util.List;
 import java.util.Map;
 

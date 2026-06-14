@@ -1,10 +1,11 @@
-package com.minzu.mapper;
+package com.backend.com.minzu.mapper;
 
+import com.backend.com.minzu.entity.NoticeReadRecord;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.minzu.entity.NoticeReadRecord;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+
 import java.util.List;
 import java.util.Map;
 

@@ -1,12 +1,31 @@
-package com.minzu.dto;
+package com.backend.com.minzu.dto;
 
-import lombok.Data;
-import javax.validation.constraints.NotBlank;
-import java.io.Serializable;
-
-@Data
-public class AIRequestDTO implements Serializable {
-    
-    @NotBlank(message = "问题不能为空")
+public class AIRequestDTO {
+    private Long userId;
     private String question;
+    private String keyword; // 法条解读关键词
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public String getQuestion() {
+        return question;
+    }
+
+    public void setQuestion(String question) {
+        this.question = question;
+    }
+
+    public String getKeyword() {
+        return keyword;
+    }
+
+    public void setKeyword(String keyword) {
+        this.keyword = keyword;
+    }
 }

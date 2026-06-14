@@ -1,6 +1,7 @@
 // UserService.java
-package com.minzu.service;
-import com.minzu.entity.User;
+package com.backend.com.minzu.service;
+
+import com.backend.com.minzu.entity.User;
 
 public interface UserService {
     User login(String username, String password);

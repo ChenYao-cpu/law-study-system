@@ -1,11 +1,12 @@
-package com.minzu.service.impl;
+package com.backend.com.minzu.service.impl;
 
+import com.backend.com.minzu.entity.Note;
+import com.backend.com.minzu.mapper.NoteMapper;
+import com.backend.com.minzu.service.NoteService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.minzu.entity.Note;
-import com.minzu.mapper.NoteMapper;
-import com.minzu.service.NoteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.util.Date;
 import java.util.List;
 

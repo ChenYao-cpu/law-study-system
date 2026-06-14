@@ -1,0 +1,66 @@
+<view class="page">
+  <!-- 导航栏 -->
+  <view class="nav-header">
+    <view class="nav-left" bindtap="goBack">
+      <text class="back-icon">‹</text>
+      <text class="back-text">返回</text>
+    </view>
+    <text class="nav-title">{{mode === 'create' ? '新建课程' : '编辑课程'}}</text>
+    <view class="nav-right"></view>
+  </view>
+
+  <view class="form-container">
+    <!-- 课程标题 -->
+    <view class="form-group">
+      <text class="label">课程标题 <text class="required">*</text></text>
+      <input class="input" placeholder="输入课程标题" value="{{form.title}}" bindinput="e => setData({ 'form.title': e.detail.value })" />
+    </view>
+
+    <!-- 课程分类 -->
+    <view class="form-group">
+      <text class="label">分类</text>
+      <picker mode="selector" range="{{categoryOptions}}" value="{{categoryIndex}}" bindchange="onCategoryChange">
+        <view class="picker">{{categoryOptions[categoryIndex]}}</view>
+      </picker>
+    </view>
+
+    <!-- 视频链接 -->
+    <view class="form-group">
+      <text class="label">视频链接 <text class="required">*</text></text>
+      <input class="input" placeholder="输入视频URL地址" value="{{form.videoUrl}}" bindinput="e => setData({ 'form.videoUrl': e.detail.value })" />
+    </view>
+
+    <!-- 封面图 -->
+    <view class="form-group">
+      <text class="label">封面图链接</text>
+      <input class="input" placeholder="输入封面图URL，不填用默认图" value="{{form.cover}}" bindinput="e => setData({ 'form.cover': e.detail.value })" />
+    </view>
+
+    <!-- 时长和积分 -->
+    <view class="form-row">
+      <view class="form-group half">
+        <text class="label">时长(分钟)</text>
+        <input class="input" type="number" placeholder="30" value="{{form.duration}}" bindinput="e => setData({ 'form.duration': e.detail.value })" />
+      </view>
+      <view class="form-group half">
+        <text class="label">完成积分</text>
+        <input class="input" type="number" placeholder="10" value="{{form.points}}" bindinput="e => setData({ 'form.points': e.detail.value })" />
+      </view>
+    </view>
+
+    <!-- 课程描述 -->
+    <view class="form-group">
+      <text class="label">课程描述</text>
+      <textarea class="textarea" placeholder="输入课程简介..." value="{{form.description}}" bindinput="e => setData({ 'form.description': e.detail.value })" />
+    </view>
+
+    <!-- 操作按钮 -->
+    <view class="btn-group">
+      <button class="btn btn-primary" bindtap="onSubmit" loading="{{submitting}}">保存课程</button>
+
+      <button class="btn btn-review" wx:if="{{mode === 'edit'}}" bindtap="submitForReview">提交法务审核</button>
+
+      <button class="btn btn-delete" wx:if="{{mode === 'edit'}}" bindtap="deleteCourse">删除课程</button>
+    </view>
+  </view>
+</view>

@@ -1,11 +1,12 @@
-package com.minzu.controller;
+package com.backend.com.minzu.controller;
 
-import com.minzu.common.Result;
-import com.minzu.entity.Note;
-import com.minzu.service.NoteService;
+import com.backend.com.minzu.common.Result;
+import com.backend.com.minzu.entity.Note;
+import com.backend.com.minzu.service.NoteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -16,9 +17,11 @@ public class NoteController {
     private NoteService noteService;
 
     @GetMapping("/list")
-    public Result<List<Note>> list(@RequestParam Long userId) {
-        List<Note> list = noteService.getUserNotes(userId);
-        return Result.success(list);
+    public Result<List<Note>> list(@RequestParam(required = false) Long userId) {
+        if (userId == null) {
+            return Result.success(new ArrayList<>());
+        }
+        return Result.success(noteService.getUserNotes(userId));
     }
 
     @PostMapping("/add")

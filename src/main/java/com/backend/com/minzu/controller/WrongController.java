@@ -1,8 +1,8 @@
-package com.minzu.controller;
+package com.backend.com.minzu.controller;
 
-import com.minzu.common.Result;
-import com.minzu.entity.WrongQuestion;
-import com.minzu.service.WrongService;
+import com.backend.com.minzu.common.Result;
+import com.backend.com.minzu.entity.WrongQuestion;
+import com.backend.com.minzu.service.WrongService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

@@ -1,4 +1,4 @@
-package com.minzu.common;
+package com.backend.com.minzu.common;
 
 import lombok.Data;
 

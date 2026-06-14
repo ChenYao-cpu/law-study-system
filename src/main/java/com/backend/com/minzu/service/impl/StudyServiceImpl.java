@@ -1,9 +1,9 @@
-package com.minzu.service.impl;
+package com.backend.com.minzu.service.impl;
 
+import com.backend.com.minzu.entity.*;
+import com.backend.com.minzu.mapper.*;
+import com.backend.com.minzu.service.StudyService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.minzu.entity.*;
-import com.minzu.mapper.*;
-import com.minzu.service.StudyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -82,6 +82,7 @@ public class StudyServiceImpl implements StudyService {
         return studyRecordMapper.getRecentRecords(userId, limit);
     }
 
+
     @Override
     public StudyRecord getUserCourseRecord(Long userId, Long courseId) {
         LambdaQueryWrapper<StudyRecord> wrapper = new LambdaQueryWrapper<>();
@@ -97,12 +98,16 @@ public class StudyServiceImpl implements StudyService {
     public void updateStudyProgress(Long userId, Long courseId, Integer duration, Integer progress) {
         StudyRecord existRecord = getUserCourseRecord(userId, courseId);
         if (existRecord != null) {
-            existRecord.setStudyDuration(existRecord.getStudyDuration() + duration);
-            if (progress != null) {
-                existRecord.setProgress(progress);
+            int newDuration = existRecord.getStudyDuration() + duration;
+            int newProgress = progress != null ? progress : existRecord.getProgress();
+
+            // 只有当新进度大于旧进度，或者时长有增加时才更新
+            if (newProgress > existRecord.getProgress() || duration > 0) {
+                existRecord.setStudyDuration(newDuration);
+                existRecord.setProgress(newProgress);
+                existRecord.setStudyTime(new Date());
+                studyRecordMapper.updateById(existRecord);
             }
-            existRecord.setStudyTime(new Date());
-            studyRecordMapper.updateById(existRecord);
         } else {
             saveStudyRecord(userId, courseId, duration, progress);
         }
@@ -293,43 +298,109 @@ public class StudyServiceImpl implements StudyService {
     @Transactional
     public Map<String, Object> generateWeeklyReport(Long userId) {
         Map<String, Object> report = new HashMap<>();
-        Date endDate = new Date();
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(endDate);
-        cal.add(Calendar.DAY_OF_MONTH, -7);
-        Date startDate = cal.getTime();
-        LambdaQueryWrapper<StudyRecord> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(StudyRecord::getUserId, userId).between(StudyRecord::getStudyTime, startDate, endDate);
-        List<StudyRecord> records = studyRecordMapper.selectList(wrapper);
-        int totalStudyTime = records.stream().mapToInt(r -> r.getStudyDuration() != null ? r.getStudyDuration() : 0).sum();
-        long courseCount = records.stream().map(StudyRecord::getCourseId).distinct().count();
-        report.put("startDate", startDate);
-        report.put("endDate", endDate);
-        report.put("totalStudyTime", totalStudyTime);
-        report.put("courseCount", courseCount);
-        report.put("averageDailyTime", totalStudyTime / 7);
+        try {
+            Date endDate = new Date();
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(endDate);
+            cal.add(Calendar.DAY_OF_MONTH, -7);
+            Date startDate = cal.getTime();
+
+            LambdaQueryWrapper<StudyRecord> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(StudyRecord::getUserId, userId)
+                    .ge(StudyRecord::getStudyTime, startDate)
+                    .le(StudyRecord::getStudyTime, endDate);
+            List<StudyRecord> records = studyRecordMapper.selectList(wrapper);
+
+            int totalStudyTime = 0;
+            Set<Long> courseIds = new HashSet<>();
+
+            if (records != null) {
+                for (StudyRecord record : records) {
+                    if (record.getStudyDuration() != null) {
+                        totalStudyTime += record.getStudyDuration();
+                    }
+                    if (record.getCourseId() != null) {
+                        courseIds.add(record.getCourseId());
+                    }
+                }
+            }
+
+            int growthValue = calculateGrowthValue(userId, startDate, endDate);
+
+            report.put("startDate", startDate);
+            report.put("endDate", endDate);
+            report.put("totalStudyTime", totalStudyTime);
+            report.put("courseCount", courseIds.size());
+            report.put("averageDailyTime", totalStudyTime / 7);
+            report.put("growthValue", growthValue);
+        } catch (Exception e) {
+            e.printStackTrace();
+            report.put("startDate", new Date());
+            report.put("endDate", new Date());
+            report.put("totalStudyTime", 0);
+            report.put("courseCount", 0);
+            report.put("averageDailyTime", 0);
+            report.put("growthValue", 0);
+        }
         return report;
     }
+
+    private int calculateGrowthValue(Long userId, Date startDate, Date endDate) {
+        LambdaQueryWrapper<GrowthRecord> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(GrowthRecord::getUserId, userId)
+                .ge(GrowthRecord::getCreateTime, startDate)
+                .le(GrowthRecord::getCreateTime, endDate);
+        List<GrowthRecord> records = growthRecordMapper.selectList(wrapper);
+
+        int totalGrowth = 0;
+        if (records != null) {
+            for (GrowthRecord record : records) {
+                if (record.getChangeValue() != null) {
+                    totalGrowth += record.getChangeValue();
+                }
+            }
+        }
+
+        return totalGrowth;
+    }
+
 
     @Override
     @Transactional
     public Map<String, Object> generateMonthlyReport(Long userId) {
         Map<String, Object> report = new HashMap<>();
-        Date endDate = new Date();
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(endDate);
-        cal.add(Calendar.MONTH, -1);
-        Date startDate = cal.getTime();
-        LambdaQueryWrapper<StudyRecord> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(StudyRecord::getUserId, userId).between(StudyRecord::getStudyTime, startDate, endDate);
-        List<StudyRecord> records = studyRecordMapper.selectList(wrapper);
-        int totalStudyTime = records.stream().mapToInt(r -> r.getStudyDuration() != null ? r.getStudyDuration() : 0).sum();
-        long courseCount = records.stream().map(StudyRecord::getCourseId).distinct().count();
-        report.put("startDate", startDate);
-        report.put("endDate", endDate);
-        report.put("totalStudyTime", totalStudyTime);
-        report.put("courseCount", courseCount);
-        report.put("averageDailyTime", totalStudyTime / 30);
+        try {
+            Date endDate = new Date();
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(endDate);
+            cal.add(Calendar.MONTH, -1);
+            Date startDate = cal.getTime();
+
+            LambdaQueryWrapper<StudyRecord> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(StudyRecord::getUserId, userId).between(StudyRecord::getStudyTime, startDate, endDate);
+            List<StudyRecord> records = studyRecordMapper.selectList(wrapper);
+
+            int totalStudyTime = records.stream()
+                    .mapToInt(r -> r.getStudyDuration() != null ? r.getStudyDuration() : 0)
+                    .sum();
+            int courseCount = (int) records.stream()
+                    .map(StudyRecord::getCourseId)
+                    .distinct()
+                    .count();
+
+            report.put("startDate", startDate);
+            report.put("endDate", endDate);
+            report.put("totalStudyTime", totalStudyTime);
+            report.put("courseCount", courseCount);
+            report.put("averageDailyTime", totalStudyTime / 30);
+            report.put("growthValue", 0);
+        } catch (Exception e) {
+            e.printStackTrace();
+            report.put("totalStudyTime", 0);
+            report.put("courseCount", 0);
+            report.put("averageDailyTime", 0);
+            report.put("growthValue", 0);
+        }
         return report;
     }
 
@@ -480,5 +551,9 @@ public class StudyServiceImpl implements StudyService {
         record.setDescription(description);
         record.setCreateTime(new Date());
         growthRecordMapper.insert(record);
+    }
+
+    public void addGrowthRecordPublic(Long userId, int changeValue, String type, String description) {
+        addGrowthRecord(userId, changeValue, type, description);
     }
 }

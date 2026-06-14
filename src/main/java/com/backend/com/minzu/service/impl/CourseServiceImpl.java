@@ -1,13 +1,14 @@
-package com.minzu.service.impl;
+package com.backend.com.minzu.service.impl;
 
+import com.backend.com.minzu.entity.Course;
+import com.backend.com.minzu.entity.StudyRecord;
+import com.backend.com.minzu.mapper.CourseMapper;
+import com.backend.com.minzu.mapper.StudyRecordMapper;
+import com.backend.com.minzu.service.CourseService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.minzu.entity.Course;
-import com.minzu.entity.StudyRecord;
-import com.minzu.mapper.CourseMapper;
-import com.minzu.mapper.StudyRecordMapper;
-import com.minzu.service.CourseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.util.Date;
 import java.util.List;
 

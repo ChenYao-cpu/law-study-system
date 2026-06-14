@@ -11,15 +11,54 @@ Page({
   },
 
   onLoad() {
+    this.getScore()
     this.loadQuestions()
+  },
+
+  onShow() {
+    this.getScore()
+  },
+
+  getScore() {
+    const userInfo = wx.getStorageSync('userInfo');
+    if (userInfo) {
+      this.setData({
+        score: userInfo.totalScore || 0
+      });
+    }
+  },
+
+  goBack() {
+    wx.reLaunch({
+      url: '/pages/index/index'
+    })
   },
 
   async loadQuestions() {
     wx.showLoading({ title: '加载中' })
     try {
-      const res = await api.getQuestions(1, 10)
+      const res = await api.getQuestions(1)
+      const questions = (res.data || []).map(q => {
+        let options = []
+        try {
+          const opts = JSON.parse(q.options)
+          if (Array.isArray(opts)) {
+            options = opts.map((opt, index) => ({
+              key: String.fromCharCode(65 + index),
+              value: opt
+            }))
+          }
+        } catch (e) {
+          console.error('解析选项失败', e)
+        }
+        return {
+          ...q,
+          options: options
+        }
+      })
+
       this.setData({
-        questions: res.data || [],
+        questions: questions,
         currentIndex: 0,
         userAnswer: '',
         showResult: false
@@ -52,10 +91,10 @@ Page({
 
       this.setData({
         showResult: true,
-        isCorrect: res.data.isCorrect
+        isCorrect: res.data.correct
       })
 
-      if (res.data.isCorrect) {
+      if (res.data.correct) {
         this.setData({ score: this.data.score + 10 })
       }
     } catch (err) {

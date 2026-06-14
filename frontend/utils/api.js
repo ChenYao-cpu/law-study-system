@@ -146,7 +146,20 @@ const api = {
     getMyReminders: (userId) => request(`/reminder/my?userId=${userId}`, 'GET'),
     getUnreadReminderCount: (userId) => request(`/reminder/unread-count?userId=${userId}`, 'GET'),
     markReminderRead: (id) => request(`/reminder/${id}/read`, 'POST'),
-    markAllRemindersRead: (userId) => request('/reminder/read-all', 'POST', { userId })
+    markAllRemindersRead: (userId) => request('/reminder/read-all', 'POST', { userId }),
+
+    // ================= 课程管理（教师端） =================
+    getTeacherCourses: (teacherId) => request(`/course/teacher/list?teacherId=${teacherId}`, 'GET'),
+    createCourse: (data) => request('/course/create', 'POST', data),
+    updateCourse: (id, data) => request(`/course/update/${id}`, 'PUT', data),
+    deleteCourse: (id) => request(`/course/${id}`, 'DELETE'),
+    submitCourseForReview: (id) => request(`/course/${id}/submit-review`, 'POST'),
+    publishCourse: (id) => request(`/course/${id}/publish`, 'POST'),
+
+    // ================= 课程审核（法务端） =================
+    getPendingCourseReviews: () => request('/review/course/pending', 'GET'),
+    approveCourse: (id, data) => request(`/review/course/${id}/approve`, 'POST', data),
+    rejectCourse: (id, data) => request(`/review/course/${id}/reject`, 'POST', data)
 }
 
 module.exports = api

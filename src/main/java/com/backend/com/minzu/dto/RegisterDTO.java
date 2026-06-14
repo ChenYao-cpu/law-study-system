@@ -1,6 +1,7 @@
-package com.minzu.dto;
+package com.backend.com.minzu.dto;
 
 import lombok.Data;
+
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 import java.io.Serializable;

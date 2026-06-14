@@ -1,9 +1,9 @@
-package com.minzu.controller;
+package com.backend.com.minzu.controller;
 
+import com.backend.com.minzu.common.Result;
+import com.backend.com.minzu.entity.Notice;
+import com.backend.com.minzu.service.NoticeService;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.minzu.common.Result;
-import com.minzu.entity.Notice;
-import com.minzu.service.NoticeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

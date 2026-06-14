@@ -1,6 +1,7 @@
-package com.minzu.service;
+package com.backend.com.minzu.service;
 
-import com.minzu.entity.WrongQuestion;
+import com.backend.com.minzu.entity.WrongQuestion;
+
 import java.util.List;
 
 public interface WrongService {

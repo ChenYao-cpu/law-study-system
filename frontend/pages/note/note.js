@@ -1,104 +1,89 @@
-const api = require('../../utils/api.js')
+const api = require('../../utils/api.js');
 
 Page({
   data: {
-    notes: [],
-    showEdit: false,
-    editNote: null,
-    title: '',
-    content: ''
+    score: 0,
+    notes: []
   },
 
   onLoad() {
-    this.loadNotes()
+    this.getScore();
+    this.loadNotes();
   },
 
-  async loadNotes() {
-    const userInfo = wx.getStorageSync('userInfo')
+  onShow() {
+    this.getScore();
+    this.loadNotes();
+  },
 
-    try {
-      const res = await api.getNotes(userInfo.id)
-      this.setData({ notes: res.data || [] })
-    } catch (err) {
-      wx.showToast({ title: '加载失败', icon: 'none' })
+  getScore() {
+    const userInfo = wx.getStorageSync('userInfo');
+
+    if (userInfo) {
+      this.setData({
+        score: userInfo.totalScore || 0
+      });
     }
   },
 
-  showAddNote() {
+  // 读取笔记
+  loadNotes() {
+    const noteList = wx.getStorageSync('noteList') || [];
+
     this.setData({
-      showEdit: true,
-      editNote: null,
-      title: '',
-      content: ''
-    })
+      notes: noteList
+    });
+
+    console.log('读取笔记：', noteList);
   },
 
-  showEditNote(e) {
-    const note = e.currentTarget.dataset.note
-    this.setData({
-      showEdit: true,
-      editNote: note,
-      title: note.title,
-      content: note.content
-    })
+  // 新建笔记
+  createNote() {
+    wx.navigateTo({
+      url: '/pages/note-edit/note-edit'
+    });
   },
 
-  hideEdit() {
-    this.setData({ showEdit: false })
+  // 查看/编辑笔记
+  openNote(e) {
+    const id = e.currentTarget.dataset.id;
+
+    wx.navigateTo({
+      url: `/pages/note-edit/note-edit?id=${id}`
+    });
   },
 
-  onTitleInput(e) {
-    this.setData({ title: e.detail.value })
-  },
-
-  onContentInput(e) {
-    this.setData({ content: e.detail.value })
-  },
-
-  async saveNote() {
-    if (!this.data.title || !this.data.content) {
-      wx.showToast({ title: '请填写标题和内容', icon: 'none' })
-      return
-    }
-
-    const userInfo = wx.getStorageSync('userInfo')
-    const noteData = {
-      userId: userInfo.id,
-      title: this.data.title,
-      content: this.data.content
-    }
-
-    if (this.data.editNote) {
-      noteData.id = this.data.editNote.id
-    }
-
-    try {
-      await api.saveNote(noteData)
-      wx.showToast({ title: '保存成功', icon: 'success' })
-      this.hideEdit()
-      this.loadNotes()
-    } catch (err) {
-      wx.showToast({ title: '保存失败', icon: 'none' })
-    }
-  },
-
-  async deleteNote(e) {
-    const noteId = e.currentTarget.dataset.id
+  // 删除笔记
+  deleteNote(e) {
+    const id = e.currentTarget.dataset.id;
 
     wx.showModal({
-      title: '确认删除',
-      content: '确定要删除这条笔记吗？',
-      success: async (res) => {
+      title: '提示',
+      content: '确定删除这篇笔记吗？',
+
+      success: (res) => {
         if (res.confirm) {
-          try {
-            await api.deleteNote(noteId)
-            wx.showToast({ title: '删除成功', icon: 'success' })
-            this.loadNotes()
-          } catch (err) {
-            wx.showToast({ title: '删除失败', icon: 'none' })
-          }
+
+          let noteList = wx.getStorageSync('noteList') || [];
+
+          noteList = noteList.filter(item => item.id != id);
+
+          wx.setStorageSync('noteList', noteList);
+
+          this.loadNotes();
+
+          wx.showToast({
+            title: '删除成功',
+            icon: 'success'
+          });
         }
       }
-    })
+    });
+  },
+
+  goBack() {
+    wx.reLaunch({
+      url: '/pages/index/index'
+    });
   }
-})
+});

@@ -1,6 +1,7 @@
-package com.minzu.dto;
+package com.backend.com.minzu.dto;
 
 import lombok.Data;
+
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;

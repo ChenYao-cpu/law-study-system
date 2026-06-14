@@ -1,27 +1,64 @@
-package com.minzu.controller;
+package com.backend.com.minzu.controller;
 
-import com.minzu.common.Result;
-import com.minzu.dto.AIRequestDTO;
-import com.minzu.service.AIService;
+import com.backend.com.minzu.common.Result;
+import com.backend.com.minzu.dto.AIRequestDTO;
+import com.backend.com.minzu.service.AIService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/ai")
 public class AIController {
-    
+
     @Autowired
     private AIService aiService;
 
-    @PostMapping("/chat")
-    public Result<Map<String, Object>> chat(@RequestBody AIRequestDTO request) {
+    /**
+     * 智能问答接口
+     */
+    @PostMapping("/ask")
+    public Object ask(@RequestBody AIRequestDTO request) {
+        return aiService.askQuestion(request.getUserId(), request.getQuestion());
+    }
+
+    /**
+     * 获取聊天历史
+     */
+    @GetMapping("/history")
+    public Object getHistory(@RequestParam Long userId) {
+        return aiService.getChatHistory(userId);
+    }
+
+    /**
+     * 法条解读接口
+     */
+    @PostMapping("/interpret")
+    public Object interpretLaw(@RequestBody AIRequestDTO request) {
+        return aiService.interpretLaw(request.getUserId(), request.getKeyword());
+    }
+    
+    /**
+     * AI生成题目接口
+     */
+    @PostMapping("/generateQuestions")
+    public Result<List<Map<String, Object>>> generateQuestions(@RequestBody Map<String, Object> params) {
         try {
-            Map<String, Object> response = aiService.chat(request);
-            return Result.success(response);
+            Long userId = Long.parseLong(params.get("userId").toString());
+            Integer questionCount = params.get("questionCount") != null ? 
+                Integer.parseInt(params.get("questionCount").toString()) : 5;
+            Integer questionType = params.get("questionType") != null ? 
+                Integer.parseInt(params.get("questionType").toString()) : 1;
+            Integer difficulty = params.get("difficulty") != null ? 
+                Integer.parseInt(params.get("difficulty").toString()) : 2;
+            
+            List<Map<String, Object>> questions = aiService.generateQuestions(userId, questionCount, questionType, difficulty);
+            return Result.success(questions);
         } catch (Exception e) {
-            return Result.error("AI服务异常：" + e.getMessage());
+            e.printStackTrace();
+            return Result.error("生成题目失败: " + e.getMessage());
         }
     }
 }

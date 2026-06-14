@@ -1,4 +1,4 @@
-package com.minzu.controller;   // 根据你的项目结构，包名应该是 com.law.controller
+package com.backend.com.minzu.controller;   // 根据你的项目结构，包名应该是 com.law.controller
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;

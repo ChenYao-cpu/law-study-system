@@ -1,0 +1,95 @@
+<view class="teacher-container">
+    <view class="custom-navbar">
+        <view class="navbar-left" bindtap="goBack">
+            <view class="home-icon">
+                <text class="iconfont icon-danghui icon-text"></text>
+            </view>
+        </view>
+        <view class="navbar-title">法务人员工作台</view>
+        <view class="navbar-right">
+            <view class="nav-dot"></view>
+            <view class="nav-dot"></view>
+            <view class="nav-dot"></view>
+            <view class="nav-circle"></view>
+        </view>
+    </view>
+
+    <view class="page-header">
+        <text class="page-title">法务人员工作台</text>
+        <text class="page-date">{{currentDate}}</text>
+    </view>
+
+    <view class="card-list">
+        <!-- 标签切换 -->
+        <view class="review-tabs">
+            <view class="review-tab {{activeTab === 'pending' ? 'active' : ''}}"
+                  bindtap="switchTab" data-tab="pending">
+                <text>待审核</text>
+                <view class="tab-badge" wx:if="{{pendingReviews.length > 0}}">{{pendingReviews.length}}</view>
+            </view>
+            <view class="review-tab {{activeTab === 'history' ? 'active' : ''}}"
+                  bindtap="switchTab" data-tab="history">
+                <text>审核记录</text>
+            </view>
+        </view>
+
+        <!-- 待审核列表 -->
+        <view class="review-list" wx:if="{{activeTab === 'pending'}}">
+            <view class="review-card" wx:for="{{pendingReviews}}" wx:key="id" bindtap="goReview" data-id="{{item.id}}">
+                <view class="card-header">
+                    <view class="card-badge" style="background: linear-gradient(135deg, #faad14 0%, #f5a623 100%);"></view>
+                    <view class="card-info">
+                        <text class="card-title">{{item.title}}</text>
+                        <text class="card-desc">{{item.questionCount}}题 | 提交人：{{item.submitter}} | {{item.submitTime}}</text>
+                    </view>
+                </view>
+                <view class="card-status pending">待审核</view>
+            </view>
+            <view class="empty-state" wx:if="{{pendingReviews.length === 0}}">
+                <text class="empty-icon">📋</text>
+                <text class="empty-text">暂无待审核测验</text>
+            </view>
+
+            <!-- 课程审核分隔线 -->
+            <view class="course-review-section" wx:if="{{pendingCourseReviews.length > 0}}">
+                <view class="section-divider">
+                    <text class="divider-text">课程审核（共{{pendingCourseReviews.length}}个）</text>
+                </view>
+                <view class="review-card course-card" wx:for="{{pendingCourseReviews}}" wx:key="id">
+                    <view class="card-header">
+                        <view class="card-badge" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></view>
+                        <view class="card-info">
+                            <text class="card-title">{{item.title}}</text>
+                            <text class="card-desc">{{item.category}} · {{item.duration}}分钟</text>
+                        </view>
+                    </view>
+                    <view class="card-actions">
+                        <button class="btn-approve" catchtap="approveCourse" data-id="{{item.id}}">通过</button>
+                        <button class="btn-reject" catchtap="rejectCourse" data-id="{{item.id}}">驳回</button>
+                    </view>
+                </view>
+            </view>
+        </view>
+
+        <!-- 审核记录 -->
+        <view class="review-list" wx:if="{{activeTab === 'history'}}">
+            <view class="review-card" wx:for="{{reviewHistory}}" wx:key="id">
+                <view class="card-header">
+                    <view class="card-badge" style="background: linear-gradient(135deg, {{item.result === 'approved' ? '#52c41a 0%, #389e0d 100%' : '#ff4d4f 0%, #d9363e 100%'}});"></view>
+                    <view class="card-info">
+                        <text class="card-title">{{item.title}}</text>
+                        <text class="card-desc">{{item.questionCount}}题 | {{item.reviewTime}}</text>
+                        <text class="card-desc" wx:if="{{item.comment}}">备注：{{item.comment}}</text>
+                    </view>
+                </view>
+                <view class="card-status {{item.result === 'approved' ? 'approved' : 'rejected'}}">
+                    {{item.result === 'approved' ? '已通过' : '已驳回'}}
+                </view>
+            </view>
+            <view class="empty-state" wx:if="{{reviewHistory.length === 0}}">
+                <text class="empty-icon">📝</text>
+                <text class="empty-text">暂无审核记录</text>
+            </view>
+        </view>
+    </view>
+</view>

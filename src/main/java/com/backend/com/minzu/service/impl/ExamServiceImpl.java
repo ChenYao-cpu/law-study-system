@@ -1,16 +1,16 @@
-package com.minzu.service.impl;
+package com.backend.com.minzu.service.impl;
 
 
 import com.alibaba.fastjson.JSON;
+import com.backend.com.minzu.entity.Exam;
+import com.backend.com.minzu.entity.Question;
+import com.backend.com.minzu.entity.User;
+import com.backend.com.minzu.mapper.ExamMapper;
+import com.backend.com.minzu.mapper.QuestionMapper;
+import com.backend.com.minzu.mapper.UserMapper;
+import com.backend.com.minzu.service.ExamService;
+import com.backend.com.minzu.service.WrongService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.minzu.entity.Exam;
-import com.minzu.entity.Question;
-import com.minzu.entity.User;
-import com.minzu.mapper.ExamMapper;
-import com.minzu.mapper.QuestionMapper;
-import com.minzu.mapper.UserMapper;
-import com.minzu.service.ExamService;
-import com.minzu.service.WrongService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

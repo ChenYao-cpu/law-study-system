@@ -1,8 +1,9 @@
 // WrongMapper.java
-package com.minzu.mapper;
+package com.backend.com.minzu.mapper;
+
+import com.backend.com.minzu.entity.WrongQuestion;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.minzu.entity.WrongQuestion;
-import org.apache.ibatis.annotations.Mapper;   // 正确包名
+import org.apache.ibatis.annotations.Mapper;
 // 不要使用 import org.springframework.stereotype.Repository;
 
 @Mapper

@@ -1,10 +1,10 @@
-package com.minzu.dto;
+package com.backend.com.minzu.dto;
 
 import lombok.Data;
+
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
-import java.util.Map;
 
 @Data
 public class AnswerDTO implements Serializable {

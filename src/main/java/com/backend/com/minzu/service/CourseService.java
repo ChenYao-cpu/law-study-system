@@ -1,6 +1,7 @@
-package com.minzu.service;
+package com.backend.com.minzu.service;
 
-import com.minzu.entity.Course;
+import com.backend.com.minzu.entity.Course;
+
 import java.util.List;
 
 public interface CourseService {

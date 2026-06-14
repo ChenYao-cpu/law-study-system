@@ -1,8 +1,10 @@
-package com.minzu.controller;
-import com.minzu.entity.Question;
-import com.minzu.service.ExamService;
+package com.backend.com.minzu.controller;
+
+import com.backend.com.minzu.entity.Question;
+import com.backend.com.minzu.service.ExamService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

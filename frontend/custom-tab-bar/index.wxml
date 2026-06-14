@@ -1,0 +1,14 @@
+<view class="tab-bar">
+  <view class="tab-bar-item {{selected === 0 ? 'active' : ''}}" bindtap="switchTab" data-index="0" data-path="/pages/index/index">
+    <text class="iconfont icon-icon_857 {{selected === 0 ? 'active' : ''}}"></text>
+    <view class="tab-text">首页</view>
+  </view>
+  <view class="tab-bar-item {{selected === 1 ? 'active' : ''}}" bindtap="switchTab" data-index="1" data-path="/pages/study/study">
+    <text class="iconfont icon-xuexi1 {{selected === 1 ? 'active' : ''}}"></text>
+    <view class="tab-text">学习</view>
+  </view>
+  <view class="tab-bar-item {{selected === 2 ? 'active' : ''}}" bindtap="switchTab" data-index="2" data-path="/pages/user/user">
+    <text class="iconfont icon-wode {{selected === 2 ? 'active' : ''}}"></text>
+    <view class="tab-text">我的</view>
+  </view>
+</view>

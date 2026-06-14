@@ -1,7 +1,8 @@
-package com.minzu.service;
+package com.backend.com.minzu.service;
 
+import com.backend.com.minzu.entity.Notice;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.minzu.entity.Notice;
+
 import java.util.List;
 import java.util.Map;
 

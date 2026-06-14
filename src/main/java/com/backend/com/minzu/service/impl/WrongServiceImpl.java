@@ -1,11 +1,12 @@
-package com.minzu.service.impl;
+package com.backend.com.minzu.service.impl;
 
+import com.backend.com.minzu.entity.WrongQuestion;
+import com.backend.com.minzu.mapper.WrongMapper;
+import com.backend.com.minzu.service.WrongService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.minzu.entity.WrongQuestion;
-import com.minzu.mapper.WrongMapper;
-import com.minzu.service.WrongService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;

@@ -1,8 +1,8 @@
-package com.minzu.controller;
+package com.backend.com.minzu.controller;
 
-import com.minzu.common.Result;
-import com.minzu.entity.KnowledgeTree;
-import com.minzu.service.StudyService;
+import com.backend.com.minzu.common.Result;
+import com.backend.com.minzu.entity.KnowledgeTree;
+import com.backend.com.minzu.service.StudyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

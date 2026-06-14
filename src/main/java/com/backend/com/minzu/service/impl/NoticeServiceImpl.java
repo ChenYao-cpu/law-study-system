@@ -1,14 +1,17 @@
-package com.minzu.service.impl;
+package com.backend.com.minzu.service.impl;
 
+import com.backend.com.minzu.entity.Notice;
+import com.backend.com.minzu.mapper.NoticeMapper;
+import com.backend.com.minzu.service.NoticeService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.minzu.entity.Notice;
-import com.minzu.mapper.NoticeMapper;
-import com.minzu.service.NoticeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class NoticeServiceImpl implements NoticeService {

@@ -1,33 +1,112 @@
-<view class="container">
-  <view class="user-header">
-    <image class="avatar" src="{{userInfo.avatar || '/images/default-avatar.png'}}" mode="aspectFill"></image>
-    <view class="user-info">
-      <text class="nickname">{{userInfo.nickname || '未登录'}}</text>
-      <text class="username">{{userInfo.username}}</text>
+<view class="page">
+  <!-- 背景图 -->
+  <image class="page-bg" src="/images/backgrounds/user-bg.jpg" mode="aspectFill"></image>
+
+  <!-- 导航栏 -->
+  <view class="nav-header">
+    <view class="nav-title">
+      <text class="title-main">民族团结</text>
+      <text class="title-sub">促进法学习</text>
+    </view>
+    <view class="nav-right">
+      <view class="score-display">
+        <view class="score-label-vertical">
+          <text>积</text>
+          <text>分</text>
+        </view>
+        <text class="score-value">{{score}}</text>
+      </view>
+      <view class="divider"></view>
+      <view class="logo-flip-container">
+        <view class="logo-card flip-animation">
+          <view class="logo-front">
+            <image class="logo-image" src="/images/logo-smu.png" mode="aspectFit"></image>
+          </view>
+          <view class="logo-back">
+            <text class="school-name">西南民族</text>
+            <text class="school-name-university">大学</text>
+          </view>
+        </view>
+      </view>
     </view>
   </view>
 
-  <view class="menu-list">
-    <view class="menu-item">
-      <text class="menu-icon">📊</text>
-      <text class="menu-text">学习记录</text>
-      <text class="menu-arrow" open-type="navigate" url="/pages/study/study">></text>
+  <!-- 容器 -->
+  <view class="container">
+    <!-- 顶部渐变个人卡片 -->
+    <view wx:if="{{isLogin}}" class="user-header">
+      <image class="avatar" src="{{userInfo.avatar || '/images/default_avatar.jpg'}}" mode="aspectFill"></image>
+      <view class="user-info">
+        <text class="nickname">{{userInfo.nickname || '用户'}}</text>
+        <view class="role-tags">
+          <view class="role-tag" wx:for="{{identityRoles}}" wx:key="key" wx:for-item="role">
+            <text>{{role.label}}</text>
+          </view>
+        </view>
+        <text class="username">ID: {{userInfo.id}}</text>
+        <text class="sign" wx:if="{{userInfo.school}}">{{userInfo.school}}</text>
+        <text class="sign" wx:if="{{!userInfo.school}}">每日进步，知识成长</text>
+      </view>
+      <view class="score-box">
+        <text class="iconfont icon-jifen"></text>
+        <text class="score-text">{{userInfo.totalScore||0}}</text>
+      </view>
     </view>
-    <view class="menu-item">
-      <text class="menu-icon">📒</text>
-      <text class="menu-text">我的笔记</text>
-      <text class="menu-arrow" open-type="navigate" url="/pages/note/note">></text>
+
+    <view wx:else class="login-prompt" bindtap="goToLogin">
+      <text class="prompt-text">点击前往登录</text>
     </view>
-    <view class="menu-item">
-      <text class="menu-icon">❌</text>
-      <text class="menu-text">错题本</text>
-      <text class="menu-arrow" open-type="navigate" url="/pages/wrong/wrong">></text>
+
+    <!-- 知识之树豪华卡片 -->
+    <view class="tree-card" wx:if="{{isLogin}}">
+      <view class="tree-title">我的专属知识之树</view>
+
+       <view class="tree-display-area">
+              <view class="tree-icon-container {{isGrowing ? 'tree-grow' : ''}} {{watering ? 'tree-shake' : ''}}">
+                <text class="iconfont icon-shu tree-icon-display tree-level-{{treeLevel}}"></text>
+              </view>
+            </view>
+
+      <view class="exp-bar">
+        <view class="exp-progress" style="width:{{treeExp/treeMaxExp*100}}%"></view>
+      </view>
+
+      <view class="tree-state">
+        <text>当前等级 · {{treeLevel}}级</text>
+      </view>
+
+      <button class="water-main-btn" bindtap="feedTree" disabled="{{watering}}">
+        <text class="iconfont icon-5 water-icon"></text>
+        <text class="water-text">{{watering ? '浇灌成长中✨' : '消耗 10 积分用心浇灌'}}</text>
+      </button>
     </view>
-    <view class="menu-item">
-      <text class="menu-icon">📋</text>
-      <text class="menu-text">考试历史</text>
+
+    <!-- 三宫格功能列表 -->
+        <!-- 三宫格功能列表 -->
+    <view class="func-grid" wx:if="{{isLogin}}">
+
+      <view class="func-item" bindtap="navTo" data-url="/pages/note/note">
+        <view class="func-icon iconfont icon-wodebiji"></view>
+        <text class="func-text">我的笔记</text>
+        <view class="func-arrow">></view>
+      </view>
+      <view class="func-item" bindtap="navTo" data-url="/pages/wrong/wrong">
+        <view class="func-icon iconfont icon-cuotiben"></view>
+        <text class="func-text">错题本</text>
+        <view class="func-arrow">></view>
+      </view>
+      <view class="func-item admin-switch" wx:if="{{isAdmin}}" bindtap="switchToAdmin">
+        <view class="func-icon iconfont icon-danghui"></view>
+        <text class="func-text">切换到管理端</text>
+        <view class="func-arrow">></view>
+      </view>
+    </view>
+<!-- ... existing code ... -->
+
+
+    <!-- 退出按钮超大底部安全区 -->
+    <view class="safe-bottom">
+      <button wx:if="{{isLogin}}" class="logout-new-btn" bindtap="logout">退出登录</button>
     </view>
   </view>
-
-  <button class="logout-btn" bindtap="logout">退出登录</button>
 </view>

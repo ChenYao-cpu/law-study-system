@@ -1,7 +1,7 @@
-package com.minzu.mapper;
+package com.backend.com.minzu.mapper;
 
+import com.backend.com.minzu.entity.Course;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.minzu.entity.Course;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper

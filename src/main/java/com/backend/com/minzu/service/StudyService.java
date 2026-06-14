@@ -1,7 +1,8 @@
-package com.minzu.service;
+package com.backend.com.minzu.service;
 
-import com.minzu.entity.KnowledgeTree;
-import com.minzu.entity.StudyRecord;
+import com.backend.com.minzu.entity.KnowledgeTree;
+import com.backend.com.minzu.entity.StudyRecord;
+
 import java.util.List;
 import java.util.Map;
 
@@ -43,4 +44,6 @@ public interface StudyService {
     KnowledgeTree getOrCreateTree(Long userId);
 
     KnowledgeTree feedTree(Long userId, Integer points);
+
+    void addGrowthRecordPublic(Long userId, int changeValue, String type, String description);
 }
