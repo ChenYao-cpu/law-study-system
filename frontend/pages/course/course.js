@@ -44,34 +44,30 @@ Page({
         }
     },
 
-    async loadCourses() {
-        try {
-            const res = await api.getCourses();
-            const courses = (res.data || []).map(c => ({
-                ...c,
-                chapter: c.category,
-                progress: 0,
-                watched: false
-            }));
+    loadCourses() {
+        const courses = [
+            { id: 1, title: '序言', chapter: 0, cover: '/images/course-covers/preface.png', videoUrl: 'https://mycoursevideos-1436507439.cos.ap-chengdu.myqcloud.com/%E5%BA%8F%E8%A8%80.mp4', duration: '03:46', points: 10, progress: 0, watched: false },
+            { id: 2, title: '第一章 总则', chapter: 1, cover: '/images/course-covers/p1.png', videoUrl: 'https://mycoursevideos-1436507439.cos.ap-chengdu.myqcloud.com/%E7%AC%AC%E4%B8%80%E7%AB%A0.mp4', duration: '05:46', points: 15, progress: 0, watched: false },
+            { id: 3, title: '第二章 民族团结', chapter: 2, cover: '/images/course-covers/p2.png', videoUrl: 'https://mycoursevideos-1436507439.cos.ap-chengdu.myqcloud.com/%E7%AC%AC%E4%BA%8C%E7%AB%A0.mp4', duration: '06:37', points: 15, progress: 0, watched: false },
+            { id: 4, title: '第三章 文化传承', chapter: 3, cover: '/images/course-covers/p3.png', videoUrl: 'https://mycoursevideos-1436507439.cos.ap-chengdu.myqcloud.com/%E7%AC%AC%E4%B8%89%E7%AB%A0.mp4', duration: '05:37', points: 15, progress: 0, watched: false },
+            { id: 5, title: '第四章 经济发展', chapter: 4, cover: '/images/course-covers/p4.png', videoUrl: 'https://mycoursevideos-1436507439.cos.ap-chengdu.myqcloud.com/%E7%AC%AC%E5%9B%9B%E7%AB%A0.mp4', duration: '04:48', points: 15, progress: 0, watched: false },
+            { id: 6, title: '第五章 社会保障', chapter: 5, cover: '/images/course-covers/p5.png', videoUrl: 'https://mycoursevideos-1436507439.cos.ap-chengdu.myqcloud.com/%E7%AC%AC%E4%BA%94%E7%AB%A0.mp4', duration: '07:18', points: 15, progress: 0, watched: false },
+            { id: 7, title: '第六章 法律责任', chapter: 6, cover: '/images/course-covers/p6.png', videoUrl: 'https://mycoursevideos-1436507439.cos.ap-chengdu.myqcloud.com/%E7%AC%AC%E5%85%AD%E7%AB%A0.mp4', duration: '04:17', points: 15, progress: 0, watched: false },
+            { id: 8, title: '第七章 附则', chapter: 7, cover: '/images/course-covers/p7.png', videoUrl: 'https://mycoursevideos-1436507439.cos.ap-chengdu.myqcloud.com/%E7%AC%AC%E4%B8%83%E7%AB%A0.mp4', duration: '02:36', points: 15, progress: 0, watched: false }
+        ];
 
-            const progressData = wx.getStorageSync('courseProgress') || {};
-            if (progressData.progress) {
-                courses.forEach(course => {
-                    const saved = progressData.progress[course.id];
-                    if (saved) {
-                        course.progress = saved.progress || 0;
-                        course.watched = saved.watched || false;
-                    }
-                });
-            }
-
-            this.setData({
-                courses: courses,
-                filteredCourses: courses
+        const progressData = wx.getStorageSync('courseProgress') || {};
+        if (progressData.progress) {
+            courses.forEach(course => {
+                const saved = progressData.progress[course.id];
+                if (saved) {
+                    course.progress = saved.progress || 0;
+                    course.watched = saved.watched || false;
+                }
             });
-        } catch (e) {
-            console.error('加载课程失败', e);
         }
+
+        this.setData({ courses: courses, filteredCourses: courses });
     },
 
     selectCategory(e) {
