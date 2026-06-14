@@ -15,7 +15,8 @@ Page({
             { label: '审核中', value: 'pending_review' },
             { label: '已发布', value: 'published' }
         ],
-        approvedCount: 0
+        approvedCount: 0,
+        pendingReviewCount: 0
     },
 
     onLoad() {
@@ -64,7 +65,8 @@ Page({
                     }
                 })
                 const approvedCount = assignments.filter(a => a.reviewStatus === 'approved').length
-                this.setData({ assignments, approvedCount })
+                const pendingReviewCount = assignments.filter(a => a.reviewStatus === 'pending_review').length
+                this.setData({ assignments, approvedCount, pendingReviewCount })
                 this.filterAssignments()
             }
         } catch (err) {
@@ -101,7 +103,7 @@ Page({
                 filtered = filtered.filter(a => a.reviewStatus === 'pending_review')
                 break
             case 'published':
-                filtered = filtered.filter(a => a.reviewStatus === 'published' || (a.reviewStatus === 'approved' && a.status === 1))
+                filtered = filtered.filter(a => a.reviewStatus === 'published')
                 break
             case 'all':
             default:
