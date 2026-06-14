@@ -68,7 +68,7 @@
     <view class="section-wrapper" wx:if="{{latestReminders.length > 0}}">
       <view class="section-header">
         <text class="section-title">📢 最新消息</text>
-        <text class="section-more" bindtap="goToReminders">查看全部</text>
+        <text class="section-more" bindtap="goToReminders">查看全部<text class="unread-badge" wx:if="{{unreadReminderCount > 0}}">{{unreadReminderCount}}</text></text>
       </view>
       <view class="notice-list">
         <view class="notice-item reminder-item" wx:for="{{latestReminders}}" wx:key="id" bindtap="goToReminders">
