@@ -555,36 +555,53 @@ public class AIServiceImpl implements AIService {
 
     @Override
     public Object askQuestion(Long userId, String question) {
-        // 1. 优先调用 DeepSeek API 获取智能回答
         try {
-            System.out.println("[AI] 智能问答 正在调用 DeepSeek... question=" + (question != null ? question.substring(0, Math.min(30, question.length())) : "null"));
-            String aiAnswer = generateAnswer(question);
+            System.out.println("[AI-RAG+微调] 智能问答: " + (question != null ? question.substring(0, Math.min(30, question.length())) : "null"));
+            // RAG检索 + 微调模拟：检索相关法条 + 注入完整知识库
+            MatchResult matchResult = findRelatedContent(question);
+            String systemPrompt = buildCombinedPrompt(matchResult);
+            String aiAnswer = callDeepSeek(systemPrompt, question);
 
             if (aiAnswer != null && !aiAnswer.startsWith("抱歉") && !aiAnswer.startsWith("调用AI服务失败")) {
-                System.out.println("[AI] 智能问答 DeepSeek 返回长度=" + aiAnswer.length());
-                // 保存到 ai_chat 表
-                try {
-                    AiChat chat = new AiChat();
-                    chat.setUserId(userId != null ? userId : 1L);
-                    chat.setQuestion("[智能问答]" + question);
-                    chat.setAnswer(aiAnswer);
-                    chat.setCreateTime(new Date());
-                    aiChatMapper.insert(chat);
-                } catch (Exception e) {
-                    System.err.println("[AI] 聊天记录保存失败: " + e.getMessage());
-                }
+                saveChat(userId, "[智能问答]" + question, aiAnswer);
                 return Result.success(aiAnswer);
             }
-
-            // DeepSeek 返回不满意，降级到本地知识库
-            String localAnswer = generateLocalAnswer(question);
-            return Result.success(localAnswer);
+            return Result.success(generateLocalAnswer(question));
         } catch (Exception e) {
             e.printStackTrace();
-            // DeepSeek 调用异常，降级到本地知识库
-            String localAnswer = generateLocalAnswer(question);
-            return Result.success(localAnswer);
+            return Result.success(generateLocalAnswer(question));
         }
+    }
+
+    /** RAG检索 + 微调知识库 融合提示词 */
+    private String buildCombinedPrompt(MatchResult matchResult) {
+        StringBuilder prompt = new StringBuilder();
+        prompt.append("你是《中华人民共和国民族团结进步促进法》的专家助手，同时使用RAG检索增强和领域微调技术。\n\n");
+        prompt.append("【回答规则】\n");
+        prompt.append("1. 必须引用具体法条编号，格式如「根据第X条」\n");
+        prompt.append("2. 区分法条原文和立法解读\n");
+        prompt.append("3. 回答结构：核心结论 → 法条依据 → 深度分析 → 实际应用\n\n");
+        // RAG检索结果
+        prompt.append("【RAG检索到的相关法条】\n");
+        if (!matchResult.articleKeys.isEmpty()) {
+            for (String key : matchResult.articleKeys) {
+                String content = getArticleContent(key);
+                if (content != null) prompt.append("「").append(key).append("」").append(content).append("\n");
+            }
+        }
+        if (!matchResult.interpretationKeys.isEmpty()) {
+            prompt.append("\n【检索到的相关解读】\n");
+            for (String key : matchResult.interpretationKeys) {
+                String interp = LAW_INTERPRETATION_DATABASE.get(key);
+                if (interp != null) prompt.append(interp).append("\n");
+            }
+        }
+        // 微调知识库（法律总览）
+        String overview = LAW_INTERPRETATION_DATABASE.get("OVERVIEW");
+        if (overview != null) {
+            prompt.append("\n【微调领域知识——法律总览】\n").append(overview).append("\n");
+        }
+        return prompt.toString();
     }
 
     /**
@@ -1125,25 +1142,36 @@ public class AIServiceImpl implements AIService {
      * 构建法条解读专用提示词
      */
     private String buildInterpretPrompt(String articleKey, String articleContent, String interpContext) {
-        return "你是《中华人民共和国民族团结进步促进法》的权威解读专家。请对以下法条进行通俗易懂的解读。\n\n" +
-            "【解读规则】\n" +
-            "1. 先用一句话概括该条的核心要义\n" +
-            "2. 逐层解析条文的含义和立法意图\n" +
-            "3. 结合立法背景和制度设计说明该条的意义\n" +
-            "4. 引用下面提供的立法解读材料\n" +
-            "5. 使用通俗的语言，让普通群众也能理解\n" +
-            "6. 最后可以补充一条实际生活中的例子说明\n\n" +
-            "【法律总览参考】\n" +
-            (LAW_INTERPRETATION_DATABASE.containsKey("OVERVIEW") ?
-                LAW_INTERPRETATION_DATABASE.get("OVERVIEW") : "") + "\n\n" +
-            "【待解读法条】\n" + (articleKey != null ? "「" + articleKey + "」\n" : "") +
-            articleContent + "\n\n" +
-            (interpContext.length() > 0 ? "【立法解读参考】\n" + interpContext + "\n\n" : "") +
-            "【回答格式】\n" +
-            "核心要义：（一句话概括）\n" +
-            "条文解读：（逐层解析）\n" +
-            "立法背景与意义：（说明为什么这样规定）\n" +
-            "实际应用：（举一个生活中的例子）";
+        StringBuilder prompt = new StringBuilder();
+        prompt.append("你是《中华人民共和国民族团结进步促进法》的权威解读专家，" +
+            "融合RAG检索增强和领域微调技术。请对以下法条进行专业解读。\n\n");
+        // 微调知识库
+        String overview = LAW_INTERPRETATION_DATABASE.get("OVERVIEW");
+        if (overview != null) {
+            prompt.append("【微调领域知识——法律总览】\n").append(overview).append("\n\n");
+        }
+        // 查找相关章节解读
+        String chapterInterp = findChapterInterpretation(articleKey);
+        if (chapterInterp != null) {
+            prompt.append("【RAG检索——章节背景】\n").append(chapterInterp).append("\n\n");
+        }
+        // RAG检索到的法条
+        prompt.append("【RAG检索——待解读法条】\n");
+        prompt.append("「").append(articleKey != null ? articleKey : "").append("」\n");
+        prompt.append(articleContent).append("\n\n");
+        // 相关立法解读
+        if (interpContext != null && interpContext.length() > 0) {
+            prompt.append("【RAG检索——立法解读】\n").append(interpContext).append("\n\n");
+        }
+        prompt.append("【解读规则】\n");
+        prompt.append("1. 先用一句话概括核心要义\n");
+        prompt.append("2. 逐层解析条文含义和立法意图\n");
+        prompt.append("3. 结合立法背景说明该条的意义\n");
+        prompt.append("4. 使用通俗语言，让普通群众也能理解\n");
+        prompt.append("5. 最后补充一个实际生活中的例子\n\n");
+        prompt.append("【回答格式】\n");
+        prompt.append("核心要义：\n条文解读：\n立法背景与意义：\n实际应用：");
+        return prompt.toString();
     }
 
     /**
