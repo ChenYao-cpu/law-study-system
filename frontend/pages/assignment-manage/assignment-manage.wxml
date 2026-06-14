@@ -32,7 +32,7 @@
         <view class="tab {{activeTab === 1 ? 'active' : ''}}" bindtap="switchTab" data-index="1">未截止</view>
         <view class="tab {{activeTab === 2 ? 'active' : ''}}" bindtap="switchTab" data-index="2">已截止</view>
         <view class="tab {{activeTab === 3 ? 'active' : ''}}" bindtap="switchTab" data-index="3">草稿</view>
-        <view class="tab {{activeTab === 4 ? 'active' : ''}}" bindtap="switchTab" data-index="4">审核中
+        <view class="tab {{activeTab === 4 ? 'active' : ''}}" bindtap="switchTab" data-index="4">审核
           <text class="tab-dot" wx:if="{{pendingReviewCount > 0}}">{{pendingReviewCount}}</text>
         </view>
         <view class="tab {{activeTab === 5 ? 'active' : ''}}" bindtap="switchTab" data-index="5">已发布

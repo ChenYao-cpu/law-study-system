@@ -133,7 +133,11 @@ public class AssignmentServiceImpl implements AssignmentService {
     
     @Override
     public void publishAssignment(Long id) {
-        assignmentMapper.updateById(new Assignment(){{setId(id);setStatus(1);}});
+        Assignment a = new Assignment();
+        a.setId(id);
+        a.setStatus(1);
+        a.setReviewStatus("published");
+        assignmentMapper.updateById(a);
     }
     
     @Override

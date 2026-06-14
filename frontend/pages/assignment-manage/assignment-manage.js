@@ -12,7 +12,7 @@ Page({
             { label: '未截止', value: 'active' },
             { label: '已截止', value: 'expired' },
             { label: '草稿', value: 'draft' },
-            { label: '审核中', value: 'pending_review' },
+            { label: '审核', value: 'review' },
             { label: '已发布', value: 'published' }
         ],
         approvedCount: 0,
@@ -65,7 +65,7 @@ Page({
                     }
                 })
                 const approvedCount = assignments.filter(a => a.reviewStatus === 'approved').length
-                const pendingReviewCount = assignments.filter(a => a.reviewStatus === 'pending_review').length
+                const pendingReviewCount = assignments.filter(a => a.reviewStatus === 'pending_review' || a.reviewStatus === 'approved' || a.reviewStatus === 'rejected').length
                 this.setData({ assignments, approvedCount, pendingReviewCount })
                 this.filterAssignments()
             }
@@ -99,8 +99,8 @@ Page({
             case 'draft':
                 filtered = filtered.filter(a => !a.reviewStatus || a.reviewStatus === 'draft' || a.reviewStatus === 'rejected')
                 break
-            case 'pending_review':
-                filtered = filtered.filter(a => a.reviewStatus === 'pending_review')
+            case 'review':
+                filtered = filtered.filter(a => a.reviewStatus === 'pending_review' || a.reviewStatus === 'approved' || a.reviewStatus === 'rejected')
                 break
             case 'published':
                 filtered = filtered.filter(a => a.reviewStatus === 'published')
