@@ -65,19 +65,22 @@
     </view>
 
     <!-- 最新消息（管理员催促提醒） -->
-    <view class="section-wrapper" wx:if="{{latestReminders.length > 0}}">
+    <view class="section-wrapper">
       <view class="section-header">
-        <text class="section-title">📢 最新消息</text>
+        <text class="section-title">消息提醒</text>
         <text class="section-more" bindtap="goToReminders">查看全部<text class="unread-badge" wx:if="{{unreadReminderCount > 0}}">{{unreadReminderCount}}</text></text>
       </view>
-      <view class="notice-list">
+      <view class="notice-list" wx:if="{{latestReminders.length > 0}}">
         <view class="notice-item reminder-item" wx:for="{{latestReminders}}" wx:key="id" bindtap="goToReminders">
-          <view class="notice-dot" style="background: #ff4d4f;"></view>
+          <view class="notice-dot" style="background: {{item.isRead ? '#d9d9d9' : '#ff4d4f'}};"></view>
           <view class="notice-content">
             <text class="notice-title">{{item.message}}</text>
             <text class="notice-date">{{item.createTime}}</text>
           </view>
         </view>
+      </view>
+      <view class="empty-tip" wx:else>
+        <text class="tip-text">暂无提醒消息</text>
       </view>
     </view>
 
