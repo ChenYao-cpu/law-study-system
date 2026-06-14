@@ -305,6 +305,8 @@ Page({
                         wx.hideLoading()
                         if (result.code === 200) {
                             wx.showToast({ title: '发布成功', icon: 'success' })
+                            // 自动切到已发布标签
+                            this.setData({ activeTab: 5, filterStatus: 'published' })
                             this.loadAssignments()
                         } else {
                             wx.showToast({ title: result.msg || '发布失败', icon: 'none' })
