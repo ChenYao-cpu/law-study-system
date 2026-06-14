@@ -149,6 +149,35 @@ page { background: #F5F5F5; min-height: 100vh; }
 .d-value { font-size: 30rpx; font-weight: bold; color: #333; }
 .d-value.warn { color: #ff4d4f; }
 
+/* ---- 折线图 ---- */
+.line-chart-wrap { padding: 20rpx 0; }
+.line-chart-svg {
+  width: 100%; height: 400rpx; background: #FAFBFC;
+  border-radius: 16rpx; padding: 20rpx; box-sizing: border-box;
+  position: relative; overflow: hidden;
+}
+.line-chart-area {
+  position: relative; width: 100%; height: 320rpx;
+  border-bottom: 2rpx solid #E5E7EB; border-left: 2rpx solid #E5E7EB;
+}
+.line-points { position: absolute; width: 100%; height: 100%; }
+.line-dot {
+  position: absolute; width: 16rpx; height: 16rpx;
+  border-radius: 50%; transform: translate(-50%, 50%);
+  box-shadow: 0 0 0 4rpx rgba(255,255,255,0.8);
+  z-index: 2;
+}
+.line-dot::after {
+  content: ''; position: absolute; bottom: -8rpx; left: 50%;
+  width: 2rpx; height: 160rpx; background: #E5E7EB;
+  transform: translateX(-50%);
+}
+.line-tag {
+  position: absolute; bottom: -52rpx; transform: translateX(-50%);
+  font-size: 20rpx; color: #333; font-weight: bold; white-space: nowrap;
+}
+.line-legend { width: 100%; margin-top: 10rpx; }
+
 /* ===== 空状态 ===== */
 .empty-state { text-align: center; padding: 120rpx 0; }
 .empty-icon { font-size: 100rpx; display: block; margin-bottom: 20rpx; }

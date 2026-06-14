@@ -74,8 +74,9 @@
         <view class="chart-header">
           <text class="chart-title">📊 成绩分布图</text>
           <view class="toggle-wrap">
-            <text class="toggle-btn {{chartType === 'bar' ? 'active' : ''}}" bindtap="switchChartType">柱状图</text>
-            <text class="toggle-btn {{chartType === 'pie' ? 'active' : ''}}" bindtap="switchChartType">饼图</text>
+            <text class="toggle-btn {{chartType === 'bar' ? 'active' : ''}}" bindtap="switchChartType" data-type="bar">柱状图</text>
+            <text class="toggle-btn {{chartType === 'pie' ? 'active' : ''}}" bindtap="switchChartType" data-type="pie">饼图</text>
+            <text class="toggle-btn {{chartType === 'line' ? 'active' : ''}}" bindtap="switchChartType" data-type="line">折线图</text>
           </view>
         </view>
 
@@ -101,6 +102,25 @@
               <view class="legend-dot" style="background: {{item.levelColor}}"></view>
               <text class="legend-label">{{item.level}} ({{item.range}}分)</text>
               <text class="legend-val">{{item.count}}人 {{item.percentage}}%</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- 折线图 -->
+        <view class="line-chart-wrap" wx:if="{{chartType === 'line'}}">
+          <view class="line-chart-svg">
+            <view class="line-chart-area">
+              <view class="line-points" wx:for="{{statistics.scoreDistribution}}" wx:key="range">
+                <view class="line-dot" style="background:{{item.levelColor}}; left:{{(index / (statistics.scoreDistribution.length - 1 || 1)) * 100}}%; bottom:{{((item.count / (statistics.scoreDistribution[0] ? statistics.maxCount || 1 : item.count || 1)) * 100) || 0}}%;"></view>
+                <view class="line-tag" style="left:{{(index / (statistics.scoreDistribution.length - 1 || 1)) * 100}}%">{{item.level}}</view>
+              </view>
+            </view>
+          </view>
+          <view class="line-legend">
+            <view class="legend-row" wx:for="{{statistics.scoreDistribution}}" wx:key="range">
+              <view class="legend-dot" style="background: {{item.levelColor}}"></view>
+              <text class="legend-label">{{item.level}} ({{item.range}}分)</text>
+              <text class="legend-val">{{item.count}}人</text>
             </view>
           </view>
         </view>

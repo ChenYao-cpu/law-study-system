@@ -14,7 +14,8 @@ Page({
             { label: '草稿', value: 'draft' },
             { label: '审核中', value: 'pending_review' },
             { label: '已发布', value: 'published' }
-        ]
+        ],
+        approvedCount: 0
     },
 
     onLoad() {
@@ -62,7 +63,8 @@ Page({
                         deadlineDate: item.deadline ? this.formatDate(item.deadline) : ''
                     }
                 })
-                this.setData({ assignments })
+                const approvedCount = assignments.filter(a => a.reviewStatus === 'approved').length
+                this.setData({ assignments, approvedCount })
                 this.filterAssignments()
             }
         } catch (err) {

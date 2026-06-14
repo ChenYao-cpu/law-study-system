@@ -1,12 +1,28 @@
 <view class="page">
   <!-- 导航栏 -->
   <view class="nav-header">
-    <view class="nav-left" bindtap="goBack">
-      <text class="back-icon">‹</text>
-      <text class="back-text">返回</text>
+    <view class="nav-left">
+      <view class="nav-back" bindtap="goBack">
+        <text class="back-icon">‹</text>
+      </view>
     </view>
-    <text class="nav-title">{{mode === 'create' ? '新建课程' : '编辑课程'}}</text>
-    <view class="nav-right"></view>
+    <view class="nav-title">
+      <text class="title-main">课程</text>
+      <text class="title-sub">{{mode === 'create' ? '新建' : '编辑'}}</text>
+    </view>
+    <view class="nav-right">
+      <view class="logo-flip-container">
+        <view class="logo-card flip-animation">
+          <view class="logo-front">
+            <image class="logo-image" src="/images/logo-smu.png" mode="aspectFit"></image>
+          </view>
+          <view class="logo-back">
+            <text class="school-name">西南民族</text>
+            <text class="school-name-university">大学</text>
+          </view>
+        </view>
+      </view>
+    </view>
   </view>
 
   <view class="form-container">

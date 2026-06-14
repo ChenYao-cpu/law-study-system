@@ -51,6 +51,8 @@ Page({
         try {
             const res = await api.getAssignmentStatistics(assignmentId)
             if (res.code === 200 && res.data && res.data.totalCount > 0) {
+                const dist = res.data.scoreDistribution || []
+                res.data.maxCount = Math.max(...dist.map(d => d.count || 0), 1)
                 this.setData({ statistics: res.data })
                 // 拿到统计数据后立刻计算饼图渐变
                 this.calcPieGrad()
@@ -78,8 +80,9 @@ Page({
         }
     },
 
-    switchChartType() {
-        this.setData({ chartType: this.data.chartType === 'bar' ? 'pie' : 'bar' })
+    switchChartType(e) {
+        const type = e.currentTarget.dataset.type
+        if (type) this.setData({ chartType: type })
     },
 
     // 预计算饼图 conic-gradient 完整字符串，移走WXML复杂运算
