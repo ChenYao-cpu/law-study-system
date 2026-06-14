@@ -48,17 +48,17 @@
             <view class="questions-panel" wx:if="{{expandedId === item.id}}">
                 <view class="q-header">
                     <text class="q-title">题目列表（{{cardQuestions.length || item.questionCount}}题）</text>
-                    <text class="q-add-btn" bindtap="goAddQuestion" data-id="{{item.id}}">+ 添加</text>
+                    <text class="q-add-btn" wx:if="{{item.reviewStatus !== 'published'}}" bindtap="goAddQuestion" data-id="{{item.id}}">+ 添加</text>
                 </view>
                 <view class="q-list" wx:if="{{cardQuestions.length > 0}}">
                     <view class="q-item" wx:for="{{cardQuestions}}" wx:key="questionId" wx:for-index="qi">
                         <text class="q-index">{{qi + 1}}.</text>
-                        <text class="q-text">{{item.questionText || item.title || '题目'}}</text>
-                        <text class="q-delete" bindtap="deleteCardQuestion" data-id="{{item.id}}" data-qid="{{cardQuestions[qi].questionId}}" data-index="{{qi}}">删除</text>
+                        <text class="q-text">{{cardQuestions[qi].questionText || item.title || '题目'}}</text>
+                        <text class="q-delete" wx:if="{{item.reviewStatus !== 'published'}}" bindtap="deleteCardQuestion" data-id="{{item.id}}" data-qid="{{cardQuestions[qi].questionId}}" data-index="{{qi}}">删除</text>
                     </view>
                 </view>
                 <view class="q-empty" wx:else><text>暂无题目，点击上方添加</text></view>
-                <view class="q-actions" wx:if="{{cardQuestions.length > 0}}">
+                <view class="q-actions" wx:if="{{cardQuestions.length > 0 && item.reviewStatus !== 'published'}}">
                     <button class="q-save-btn" bindtap="saveCardQuestions" data-id="{{item.id}}">保存题目</button>
                 </view>
             </view>
@@ -80,7 +80,6 @@
                     <button class="action-btn danger" bindtap="deleteAssignment" data-id="{{item.id}}">删除</button>
                 </block>
                 <block wx:if="{{item.reviewStatus === 'published'}}">
-                    <button class="action-btn" bindtap="toggleExpand" data-id="{{item.id}}">题目</button>
                     <button class="action-btn primary" bindtap="viewSubmissions" data-id="{{item.id}}">查看提交</button>
                     <button class="action-btn danger" bindtap="deleteAssignment" data-id="{{item.id}}">删除</button>
                 </block>
