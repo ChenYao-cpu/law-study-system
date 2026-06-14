@@ -32,13 +32,19 @@ public class TeacherController {
                             .orderByDesc(AssignmentSubmission::getSubmitTime)
             );
 
+            // 获取作业总分用于百分制转换
+            Assignment assignment = assignmentMapper.selectById(assignmentId);
+            int totalScore = (assignment != null && assignment.getTotalScore() != null) ? assignment.getTotalScore() : 100;
+
             List<Map<String, Object>> result = new ArrayList<>();
             for (AssignmentSubmission submission : submissions) {
+                int rawScore = submission.getScore() != null ? submission.getScore() : 0;
+                int normalizedScore = totalScore > 0 ? (int) Math.round((double) rawScore / totalScore * 100) : rawScore;
                 Map<String, Object> item = new HashMap<>();
                 item.put("id", submission.getId());
                 item.put("assignmentId", submission.getAssignmentId());
                 item.put("studentId", submission.getStudentId());
-                item.put("score", submission.getScore());
+                item.put("score", normalizedScore);
                 item.put("submitTime", submission.getSubmitTime());
                 item.put("status", submission.getStatus());
 
@@ -101,10 +107,16 @@ public class TeacherController {
                 }
             }
 
-            // 只用已提交的分数做统计
+            // 获取作业总分，用于标准化为百分制
+            Assignment assignment = assignmentMapper.selectById(assignmentId);
+            int assignmentTotalScore = (assignment != null && assignment.getTotalScore() != null) ? assignment.getTotalScore() : 100;
+
+            // 只用已提交的分数做统计，统一转为百分制
             List<Integer> allScores = new ArrayList<>();
             for (AssignmentSubmission s : submissions) {
-                allScores.add(s.getScore() != null ? s.getScore() : 0);
+                int rawScore = s.getScore() != null ? s.getScore() : 0;
+                int normalizedScore = assignmentTotalScore > 0 ? (int) Math.round((double) rawScore / assignmentTotalScore * 100) : rawScore;
+                allScores.add(normalizedScore);
             }
 
             int totalCount = allPartyMembers.size();
