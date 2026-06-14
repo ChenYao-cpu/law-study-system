@@ -73,7 +73,7 @@
             show-fullscreen-btn="{{true}}"
             show-center-play-btn="{{true}}"
             enable-progress-gesture="{{canDrag}}"
-            direction="{{0}}"
+            direction="{{90}}"
             bindfullscreenchange="onFullScreenChange"
             bindplay="videoPlay"
             bindpause="videoPause"
