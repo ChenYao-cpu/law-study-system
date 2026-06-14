@@ -434,4 +434,28 @@ public class AssignmentController {
             return Result.error("添加失败: " + e.getMessage());
         }
     }
+
+    /** 删除作业中的一道题目 */
+    @DeleteMapping("/{assignmentId}/questions/{questionId}")
+    public Result<String> removeQuestionFromAssignment(@PathVariable Long assignmentId, @PathVariable Long questionId) {
+        try {
+            assignmentQuestionMapper.delete(
+                    new LambdaQueryWrapper<AssignmentQuestion>()
+                            .eq(AssignmentQuestion::getAssignmentId, assignmentId)
+                            .eq(AssignmentQuestion::getQuestionId, questionId)
+            );
+            // 更新题目数
+            Assignment assignment = assignmentMapper.selectById(assignmentId);
+            if (assignment != null) {
+                int total = assignmentQuestionMapper.selectCount(
+                        new LambdaQueryWrapper<AssignmentQuestion>().eq(AssignmentQuestion::getAssignmentId, assignmentId)).intValue();
+                assignment.setQuestionCount(total);
+                assignmentMapper.updateById(assignment);
+            }
+            return Result.success("题目已删除");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Result.error("删除失败: " + e.getMessage());
+        }
+    }
 }
