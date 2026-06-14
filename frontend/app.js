@@ -1,3 +1,5 @@
+const { BASE_URL } = require('./utils/config.js')
+
 App({
     onLaunch() {
         const userInfo = wx.getStorageSync('userInfo')
@@ -7,6 +9,6 @@ App({
     },
     globalData: {
         userInfo: null,
-        baseUrl: 'http://localhost:8080/api'
+        baseUrl: BASE_URL
     }
 })
