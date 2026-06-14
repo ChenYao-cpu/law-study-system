@@ -2,25 +2,13 @@
   <image class="page-bg" src="/images/backgrounds/user-bg.jpg" mode="aspectFill"></image>
 
   <view class="nav-header">
-    <view class="nav-left">
-      <view class="nav-back" bindtap="goBack">
-        <text class="back-icon">‹</text>
-      </view>
-    </view>
-    <view class="nav-title">
-      <text class="title-main">作业</text>
-      <text class="title-sub">管理</text>
-    </view>
+    <view class="nav-left"><view class="nav-back" bindtap="goBack"><text class="back-icon">‹</text></view></view>
+    <view class="nav-title"><text class="title-main">作业</text><text class="title-sub">管理</text></view>
     <view class="nav-right">
       <view class="logo-flip-container">
         <view class="logo-card flip-animation">
-          <view class="logo-front">
-            <image class="logo-image" src="/images/logo-smu.png" mode="aspectFit"></image>
-          </view>
-          <view class="logo-back">
-            <text class="school-name">西南民族</text>
-            <text class="school-name-university">大学</text>
-          </view>
+          <view class="logo-front"><image class="logo-image" src="/images/logo-smu.png" mode="aspectFit"></image></view>
+          <view class="logo-back"><text class="school-name">西南民族</text><text class="school-name-university">大学</text></view>
         </view>
       </view>
     </view>
@@ -32,30 +20,19 @@
         <view class="tab {{activeTab === 1 ? 'active' : ''}}" bindtap="switchTab" data-index="1">未截止</view>
         <view class="tab {{activeTab === 2 ? 'active' : ''}}" bindtap="switchTab" data-index="2">已截止</view>
         <view class="tab {{activeTab === 3 ? 'active' : ''}}" bindtap="switchTab" data-index="3">草稿</view>
-        <view class="tab {{activeTab === 4 ? 'active' : ''}}" bindtap="switchTab" data-index="4">审核
-          <text class="tab-dot" wx:if="{{pendingReviewCount > 0}}">{{pendingReviewCount}}</text>
-        </view>
-        <view class="tab {{activeTab === 5 ? 'active' : ''}}" bindtap="switchTab" data-index="5">已发布
-          <text class="tab-dot" wx:if="{{approvedCount > 0}}">{{approvedCount}}</text>
-        </view>
+        <view class="tab {{activeTab === 4 ? 'active' : ''}}" bindtap="switchTab" data-index="4">审核<text class="tab-dot" wx:if="{{pendingReviewCount > 0}}">{{pendingReviewCount}}</text></view>
+        <view class="tab {{activeTab === 5 ? 'active' : ''}}" bindtap="switchTab" data-index="5">已发布<text class="tab-dot" wx:if="{{approvedCount > 0}}">{{approvedCount}}</text></view>
     </view>
 
     <view class="assignment-list" wx:if="{{filteredAssignments.length > 0}}">
         <view class="assignment-card {{item.reviewStatus}}" wx:for="{{filteredAssignments}}" wx:key="id">
-            <view class="card-header">
+            <view class="card-header" bindtap="toggleExpand" data-id="{{item.id}}">
                 <text class="assignment-title">{{item.title}}</text>
                 <view class="status-row">
-                    <view class="deadline-badge {{item.isExpired ? 'expired' : 'active'}}" wx:if="{{item.reviewStatus === 'published' || item.reviewStatus === 'approved'}}">
-                        {{item.isExpired ? '已截止' : '未截止'}}
-                    </view>
-                    <view class="status-badge {{item.reviewStatus || 'draft'}}">
-                        {{item.reviewStatus === 'draft' || !item.reviewStatus ? '草稿' : ''}}
-                        {{item.reviewStatus === 'pending_review' ? '审核中' : ''}}
-                        {{item.reviewStatus === 'approved' ? '已通过' : ''}}
-                        {{item.reviewStatus === 'rejected' ? '已驳回' : ''}}
-                        {{item.reviewStatus === 'published' ? '已发布' : ''}}
-                    </view>
+                    <view class="deadline-badge {{item.isExpired ? 'expired' : 'active'}}" wx:if="{{item.reviewStatus === 'published' || item.reviewStatus === 'approved'}}">{{item.isExpired ? '已截止' : '未截止'}}</view>
+                    <view class="status-badge {{item.reviewStatus || 'draft'}}">{{item.reviewStatus === 'draft' || !item.reviewStatus ? '草稿' : ''}}{{item.reviewStatus === 'pending_review' ? '审核中' : ''}}{{item.reviewStatus === 'approved' ? '已通过' : ''}}{{item.reviewStatus === 'rejected' ? '已驳回' : ''}}{{item.reviewStatus === 'published' ? '已发布' : ''}}</view>
                 </view>
+                <text class="expand-arrow">{{expandedId === item.id ? '▲' : '▼'}}</text>
             </view>
 
             <view class="card-info">
@@ -63,60 +40,55 @@
                 <text class="info-item">截止 {{item.deadlineDate || item.deadline}}</text>
             </view>
 
-            <!-- 驳回信息 -->
-            <view class="reject-info" wx:if="{{item.reviewStatus === 'rejected'}}">
-                <text class="reject-text">已驳回</text>
-                <text class="review-comment" wx:if="{{item.reviewComment}}">理由：{{item.reviewComment}}</text>
+            <!-- 驳回/审核信息 -->
+            <view class="reject-info" wx:if="{{item.reviewStatus === 'rejected'}}"><text class="reject-text">已驳回</text><text class="review-comment" wx:if="{{item.reviewComment}}">理由：{{item.reviewComment}}</text></view>
+            <view class="approved-info" wx:if="{{(item.reviewStatus === 'approved' || item.reviewStatus === 'published') && item.reviewComment}}"><text class="approved-text">法务意见：{{item.reviewComment}}</text></view>
+
+            <!-- 展开题目列表 -->
+            <view class="questions-panel" wx:if="{{expandedId === item.id}}">
+                <view class="q-header">
+                    <text class="q-title">题目列表（{{cardQuestions.length || item.questionCount}}题）</text>
+                    <text class="q-add-btn" bindtap="goAddQuestion" data-id="{{item.id}}">+ 添加</text>
+                </view>
+                <view class="q-list" wx:if="{{cardQuestions.length > 0}}">
+                    <view class="q-item" wx:for="{{cardQuestions}}" wx:key="questionId" wx:for-index="qi">
+                        <text class="q-index">{{qi + 1}}.</text>
+                        <text class="q-text">{{item.questionText || item.title || '题目'}}</text>
+                        <text class="q-delete" bindtap="deleteCardQuestion" data-id="{{item.id}}" data-index="{{qi}}">删除</text>
+                    </view>
+                </view>
+                <view class="q-empty" wx:else><text>暂无题目，点击上方添加</text></view>
+                <view class="q-actions" wx:if="{{cardQuestions.length > 0}}">
+                    <button class="q-save-btn" bindtap="saveCardQuestions" data-id="{{item.id}}">保存题目</button>
+                </view>
             </view>
 
-            <!-- 审核通过信息（审核已通过但未发布的） -->
-            <view class="approved-info" wx:if="{{item.reviewStatus === 'approved' && item.reviewComment}}">
-                <text class="approved-text">法务意见：{{item.reviewComment}}</text>
-            </view>
-
-            <!-- 已发布带审核留言 -->
-            <view class="approved-info" wx:if="{{item.reviewStatus === 'published' && item.reviewComment}}">
-                <text class="approved-text">法务意见：{{item.reviewComment}}</text>
-            </view>
-
+            <!-- 操作按钮 -->
             <view class="card-actions">
-                <!-- 草稿/已驳回 -->
                 <block wx:if="{{item.reviewStatus === 'draft' || item.status === 0 || !item.reviewStatus || item.reviewStatus === 'rejected'}}">
-                    <button class="action-btn" bindtap="editAssignment" data-id="{{item.id}}">编辑</button>
+                    <button class="action-btn" bindtap="toggleExpand" data-id="{{item.id}}">题目</button>
                     <button class="action-btn primary" bindtap="submitForReview" data-id="{{item.id}}">送审</button>
                     <button class="action-btn danger" bindtap="deleteAssignment" data-id="{{item.id}}">删除</button>
                 </block>
-
-                <!-- 审核中 -->
                 <block wx:if="{{item.reviewStatus === 'pending_review'}}">
                     <view class="waiting-badge">等待法务审核中</view>
-                    <button class="action-btn" bindtap="editAssignment" data-id="{{item.id}}">编辑</button>
                     <button class="action-btn danger" bindtap="deleteAssignment" data-id="{{item.id}}">删除</button>
                 </block>
-
-                <!-- 已通过 -->
                 <block wx:if="{{item.reviewStatus === 'approved'}}">
+                    <button class="action-btn" bindtap="toggleExpand" data-id="{{item.id}}">题目</button>
                     <button class="action-btn publish" bindtap="publishAssignment" data-id="{{item.id}}">发布</button>
-                    <button class="action-btn" bindtap="editAssignment" data-id="{{item.id}}">编辑</button>
                     <button class="action-btn danger" bindtap="deleteAssignment" data-id="{{item.id}}">删除</button>
                 </block>
-
-                <!-- 已发布 -->
                 <block wx:if="{{item.reviewStatus === 'published'}}">
+                    <button class="action-btn" bindtap="toggleExpand" data-id="{{item.id}}">题目</button>
                     <button class="action-btn primary" bindtap="viewSubmissions" data-id="{{item.id}}">查看提交</button>
-                    <button class="action-btn" bindtap="editAssignment" data-id="{{item.id}}">编辑</button>
                     <button class="action-btn danger" bindtap="deleteAssignment" data-id="{{item.id}}">删除</button>
                 </block>
             </view>
         </view>
     </view>
 
-    <view class="empty-state" wx:else>
-        <text class="empty-text">暂无作业</text>
-    </view>
-
-    <view class="fab-btn" bindtap="goPublish">
-        <text>+</text>
-    </view>
+    <view class="empty-state" wx:else><text class="empty-text">暂无作业</text></view>
+    <view class="fab-btn" bindtap="goPublish"><text>+</text></view>
   </view>
 </view>

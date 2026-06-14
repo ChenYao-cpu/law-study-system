@@ -16,7 +16,9 @@ Page({
             { label: '已发布', value: 'published' }
         ],
         approvedCount: 0,
-        pendingReviewCount: 0
+        pendingReviewCount: 0,
+        expandedId: null,
+        cardQuestions: []
     },
 
     onLoad() {
@@ -137,6 +139,71 @@ Page({
     editAssignment(e) {
         const id = e.currentTarget.dataset.id
         wx.navigateTo({ url: `/pages/assignment-edit/assignment-edit?id=${id}` })
+    },
+
+    // 展开/收起题目
+    async toggleExpand(e) {
+        const id = e.currentTarget.dataset.id
+        if (this.data.expandedId === id) {
+            this.setData({ expandedId: null, cardQuestions: [] })
+            return
+        }
+        this.setData({ expandedId: id })
+        await this.loadCardQuestions(id)
+    },
+
+    // 加载作业题目
+    async loadCardQuestions(assignmentId) {
+        try {
+            const res = await api.getAssignmentQuestions(assignmentId)
+            const questions = (res.data || []).map((q, i) => ({
+                questionId: q.questionId || q.id,
+                questionText: q.questionText || q.title || '',
+                _index: i
+            }))
+            this.setData({ cardQuestions: questions })
+        } catch (e) {
+            this.setData({ cardQuestions: [] })
+        }
+    },
+
+    // 删除展开中的题目
+    deleteCardQuestion(e) {
+        const index = e.currentTarget.dataset.index
+        const questions = [...this.data.cardQuestions]
+        questions.splice(index, 1)
+        this.setData({ cardQuestions: questions })
+    },
+
+    // 跳转添加题目
+    goAddQuestion(e) {
+        const id = e.currentTarget.dataset.id
+        wx.navigateTo({ url: `/pages/question-edit/question-edit?assignmentId=${id}&index=new` })
+        // 返回后刷新题目
+        const that = this
+        this._refreshId = id
+    },
+
+    // 保存题目变更到后端
+    async saveCardQuestions(e) {
+        const id = e.currentTarget.dataset.id
+        wx.showLoading({ title: '保存中...' })
+        try {
+            // 删除旧题目再重新保存
+            const questions = this.data.cardQuestions.map((q, i) => ({
+                questionId: q.questionId || (Date.now() + i),
+                questionText: q.questionText,
+                sortOrder: i + 1
+            }))
+            // 更新作业题目
+            await api.updateAssignment(id, { questions })
+            wx.hideLoading()
+            wx.showToast({ title: '已保存', icon: 'success' })
+            this.loadAssignments()
+        } catch (e) {
+            wx.hideLoading()
+            wx.showToast({ title: '保存失败', icon: 'none' })
+        }
     },
 
     // 查看审核结果
