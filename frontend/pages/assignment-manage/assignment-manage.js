@@ -99,7 +99,7 @@ Page({
                 filtered = filtered.filter(a => a.isExpired && a.reviewStatus === 'published')
                 break
             case 'draft':
-                filtered = filtered.filter(a => !a.reviewStatus || a.reviewStatus === 'draft' || a.reviewStatus === 'rejected')
+                filtered = filtered.filter(a => !a.reviewStatus || a.reviewStatus === 'draft')
                 break
             case 'review':
                 filtered = filtered.filter(a => a.reviewStatus === 'pending_review' || a.reviewStatus === 'approved' || a.reviewStatus === 'rejected')
