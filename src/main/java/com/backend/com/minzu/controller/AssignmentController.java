@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -387,27 +388,27 @@ public class AssignmentController {
             String type = (String) params.getOrDefault("type", "manual");
             if ("bank_random".equals(type)) {
                 int count = params.get("count") != null ? Integer.parseInt(params.get("count").toString()) : 5;
-                // 从题库随机抽取
+                // 排除已在该作业中的题目
+                List<AssignmentQuestion> existing = assignmentQuestionMapper.selectList(
+                        new LambdaQueryWrapper<AssignmentQuestion>().eq(AssignmentQuestion::getAssignmentId, id));
+                Set<Long> existingIds = existing.stream().map(AssignmentQuestion::getQuestionId).collect(Collectors.toSet());
                 List<Question> allQuestions = questionMapper.selectList(null);
-                if (allQuestions.isEmpty()) return Result.error("题库为空");
-                Collections.shuffle(allQuestions);
-                int max = Math.min(count, allQuestions.size());
-                // 获取当前已有题目数量作为排序偏移
-                int offset = assignmentQuestionMapper.selectCount(
-                        new LambdaQueryWrapper<AssignmentQuestion>().eq(AssignmentQuestion::getAssignmentId, id)).intValue();
+                List<Question> available = allQuestions.stream().filter(q -> !existingIds.contains(q.getId())).collect(Collectors.toList());
+                if (available.isEmpty()) return Result.error("题库中没有可添加的新题目");
+                Collections.shuffle(available);
+                int max = Math.min(count, available.size());
+                int offset = existing.size();
                 for (int i = 0; i < max; i++) {
                     AssignmentQuestion aq = new AssignmentQuestion();
                     aq.setAssignmentId(id);
-                    aq.setQuestionId(allQuestions.get(i).getId());
+                    aq.setQuestionId(available.get(i).getId());
                     aq.setSortOrder(offset + i + 1);
                     assignmentQuestionMapper.insert(aq);
                 }
                 // 更新作业题目数
                 Assignment assignment = assignmentMapper.selectById(id);
                 if (assignment != null) {
-                    int total = assignmentQuestionMapper.selectCount(
-                            new LambdaQueryWrapper<AssignmentQuestion>().eq(AssignmentQuestion::getAssignmentId, id)).intValue();
-                    assignment.setQuestionCount(total);
+                    assignment.setQuestionCount(offset + max);
                     assignmentMapper.updateById(assignment);
                 }
                 return Result.success("已从题库随机添加" + max + "道题");
