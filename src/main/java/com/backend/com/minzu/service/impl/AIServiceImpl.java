@@ -872,6 +872,84 @@ public class AIServiceImpl implements AIService {
         String matchedChapter = null;
     }
 
+    /** 向量化语义检索：TF-IDF 风格，将问题与全部法条做余弦相似度计算 */
+    private List<String> semanticVectorSearch(String question) {
+        List<String> result = new ArrayList<>();
+        // 构建问题的词频向量
+        Map<String, Integer> queryVec = buildTermVector(question);
+        if (queryVec.isEmpty()) return result;
+        // 与每条法条的关键词向量计算相似度
+        List<Map.Entry<String, Double>> scores = new ArrayList<>();
+        for (String articleKey : LAW_DATABASE.keySet()) {
+            String articleText = getArticleContent(articleKey);
+            if (articleText == null) continue;
+            // 法条向量 = 法条正文词频 + 关键词数据库词频
+            Map<String, Integer> articleVec = buildTermVector(articleText);
+            // 加入该法条在关键词数据库中的扩展词
+            for (Map.Entry<String, String> kwEntry : KEYWORD_DATABASE.entrySet()) {
+                if (articleKey.equals(kwEntry.getValue())) {
+                    for (String kw : kwEntry.getKey().split(",")) {
+                        articleVec.merge(kw.trim(), 3, Integer::sum); // 关键词权重x3
+                    }
+                }
+            }
+            // 加入立法解读词频（如有）
+            String articleNum = articleKey.replace("第", "").replace("条", "");
+            String interpKey = "ARTICLE_" + articleNum;
+            String interp = LAW_INTERPRETATION_DATABASE.get(interpKey);
+            if (interp != null) {
+                Map<String, Integer> interpVec = buildTermVector(interp);
+                interpVec.forEach((k, v) -> articleVec.merge(k, v, Integer::sum));
+            }
+            double similarity = cosineSimilarity(queryVec, articleVec);
+            if (similarity > 0.05) {
+                scores.add(new AbstractMap.SimpleEntry<>(articleKey, similarity));
+            }
+        }
+        // 按相似度降序排列，取Top5
+        scores.sort((a, b) -> Double.compare(b.getValue(), a.getValue()));
+        for (int i = 0; i < Math.min(5, scores.size()); i++) {
+            result.add(scores.get(i).getKey());
+        }
+        return result;
+    }
+
+    /** 将文本转为词频向量（中文分词简化：按字符bigram切分） */
+    private Map<String, Integer> buildTermVector(String text) {
+        Map<String, Integer> vec = new HashMap<>();
+        if (text == null || text.isEmpty()) return vec;
+        // 去掉标点和空白
+        String cleaned = text.replaceAll("[\\s\\p{Punct}。，、；：「」『』【】《》？！\"'（）\\d]", "");
+        // Bigram切分（两个连续字符为一个term）
+        for (int i = 0; i < cleaned.length() - 1; i++) {
+            String bigram = cleaned.substring(i, Math.min(i + 2, cleaned.length()));
+            vec.merge(bigram, 1, Integer::sum);
+        }
+        // 同时加入单字（提升短词匹配）
+        for (int i = 0; i < cleaned.length(); i++) {
+            String unigram = cleaned.substring(i, i + 1);
+            vec.merge(unigram, 1, Integer::sum);
+        }
+        return vec;
+    }
+
+    /** 余弦相似度 */
+    private double cosineSimilarity(Map<String, Integer> v1, Map<String, Integer> v2) {
+        if (v1.isEmpty() || v2.isEmpty()) return 0;
+        Set<String> allKeys = new HashSet<>(v1.keySet());
+        allKeys.addAll(v2.keySet());
+        double dotProduct = 0, norm1 = 0, norm2 = 0;
+        for (String key : allKeys) {
+            double a = v1.getOrDefault(key, 0);
+            double b = v2.getOrDefault(key, 0);
+            dotProduct += a * b;
+            norm1 += a * a;
+            norm2 += b * b;
+        }
+        if (norm1 == 0 || norm2 == 0) return 0;
+        return dotProduct / (Math.sqrt(norm1) * Math.sqrt(norm2));
+    }
+
     private String generateAnswer(String question) {
         try {
             MatchResult matchResult = findRelatedContent(question);
@@ -910,7 +988,15 @@ public class AIServiceImpl implements AIService {
             }
         }
 
-        // 2. 原有关键词匹配
+        // 2. 向量化语义检索：将问题与所有法条做TF-IDF相似度计算，找到语义相关的法条
+        List<String> semanticArticles = semanticVectorSearch(question);
+        for (String key : semanticArticles) {
+            if (!result.articleKeys.contains(key)) {
+                result.articleKeys.add(key);
+            }
+        }
+
+        // 3. 原有关键词匹配
         List<String> sortedKeywords = new ArrayList<>(KEYWORD_DATABASE.keySet());
         sortedKeywords.sort((a, b) -> b.length() - a.length());
         for (String keyword : sortedKeywords) {
