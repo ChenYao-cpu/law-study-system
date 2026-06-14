@@ -266,6 +266,10 @@ Page({
         }
     },
 
+    onFullScreenChange(e) {
+        this.setData({ isFullScreen: e.detail.fullScreen })
+    },
+
     onUnload() {
         if (this.videoContext) {
             this.videoContext.pause();
