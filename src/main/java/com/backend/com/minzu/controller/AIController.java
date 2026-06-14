@@ -41,6 +41,24 @@ public class AIController {
     }
     
     /**
+     * RAG智能问答 —— 检索增强生成
+     * 先检索相关法条，再作为上下文注入提示词，调用DeepSeek生成回答
+     */
+    @PostMapping("/rag")
+    public Object askRAG(@RequestBody AIRequestDTO request) {
+        return aiService.askRAG(request.getUserId(), request.getQuestion());
+    }
+
+    /**
+     * 微调模型问答 —— 基于完整法律知识库的专业问答
+     * 将全部法条+立法解读作为领域知识，模拟微调后的法律专家模型
+     */
+    @PostMapping("/finetuned")
+    public Object askFineTuned(@RequestBody AIRequestDTO request) {
+        return aiService.askFineTuned(request.getUserId(), request.getQuestion());
+    }
+
+    /**
      * AI生成题目接口
      */
     @PostMapping("/generateQuestions")

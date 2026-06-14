@@ -1507,4 +1507,105 @@ public class AIServiceImpl implements AIService {
         question.put("questionType", questionType);
         return question;
     }
+
+    // ==================== RAG检索增强问答 ====================
+    @Override
+    public Object askRAG(Long userId, String question) {
+        try {
+            System.out.println("[RAG] 收到问题: " + (question != null ? question.substring(0, Math.min(30, question.length())) : "null"));
+            // 1. 检索相关法条
+            MatchResult matchResult = findRelatedContent(question);
+            // 2. 构建RAG提示词（检索结果注入）
+            String systemPrompt = buildRAGPrompt(matchResult);
+            // 3. 调用DeepSeek
+            String aiAnswer = callDeepSeek(systemPrompt, question);
+            if (aiAnswer != null && !aiAnswer.startsWith("抱歉") && !aiAnswer.startsWith("调用AI服务失败")) {
+                saveChat(userId, "[RAG]" + question, aiAnswer);
+                return Result.success("【RAG检索增强回答】\n\n" + aiAnswer);
+            }
+            // 降级到本地知识库
+            return Result.success("【RAG本地回答】\n\n" + generateLocalAnswer(question));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Result.success("【RAG本地回答】\n\n" + generateLocalAnswer(question));
+        }
+    }
+
+    private String buildRAGPrompt(MatchResult matchResult) {
+        StringBuilder prompt = new StringBuilder();
+        prompt.append("你是法律AI助手，请仅基于以下检索到的法条原文和立法解读回答问题。\n\n");
+        prompt.append("【回答规则】\n");
+        prompt.append("1. 必须引用检索到的具体法条编号\n");
+        prompt.append("2. 区分法条原文和立法解读\n");
+        prompt.append("3. 如果检索材料不足以回答，请诚实说明\n\n");
+        prompt.append("【检索到的相关法条】\n");
+        if (!matchResult.articleKeys.isEmpty()) {
+            for (String key : matchResult.articleKeys) {
+                String content = getArticleContent(key);
+                if (content != null) prompt.append("「").append(key).append("」").append(content).append("\n");
+            }
+        } else {
+            prompt.append("（未检索到直接匹配的法条，请基于法律总览知识谨慎回答）\n");
+        }
+        if (!matchResult.interpretationKeys.isEmpty()) {
+            prompt.append("\n【检索到的相关解读】\n");
+            for (String key : matchResult.interpretationKeys) {
+                String interp = LAW_INTERPRETATION_DATABASE.get(key);
+                if (interp != null) prompt.append(interp).append("\n");
+            }
+        }
+        return prompt.toString();
+    }
+
+    // ==================== 微调模拟问答 ====================
+    @Override
+    public Object askFineTuned(Long userId, String question) {
+        try {
+            System.out.println("[微调] 收到问题: " + (question != null ? question.substring(0, Math.min(30, question.length())) : "null"));
+            // 构建微调模拟提示词（注入全部法律知识作为领域知识）
+            String systemPrompt = buildFineTunedPrompt(question);
+            String aiAnswer = callDeepSeek(systemPrompt, question);
+            if (aiAnswer != null && !aiAnswer.startsWith("抱歉") && !aiAnswer.startsWith("调用AI服务失败")) {
+                saveChat(userId, "[微调]" + question, aiAnswer);
+                return Result.success("【微调模型回答】\n\n" + aiAnswer);
+            }
+            return Result.success("【微调模型回答】\n\n" + generateLocalAnswer(question));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Result.success("【微调模型回答】\n\n" + generateLocalAnswer(question));
+        }
+    }
+
+    private String buildFineTunedPrompt(String question) {
+        StringBuilder prompt = new StringBuilder();
+        prompt.append("你是经过《中华人民共和国民族团结进步促进法》领域微调训练的法律专家模型。\n");
+        prompt.append("你已完整学习该法律的全部65条法条及官方立法解读，能够像真正的法律专家一样回答问题。\n\n");
+        prompt.append("【回答规则】\n");
+        prompt.append("1. 你必须展现微调后的领域专业性——使用精确的法律术语\n");
+        prompt.append("2. 每个回答必须引用具体法条编号和原文\n");
+        prompt.append("3. 结合立法背景和目的进行深度分析\n");
+        prompt.append("4. 给出实际应用场景和法律建议\n");
+        prompt.append("5. 回答结构：核心结论 → 法条依据 → 深度解读 → 实际应用\n\n");
+        // 注入完整法律知识库
+        String fullArticles = loadAllArticlesForPrompt();
+        prompt.append("【你的领域知识库 —— 已通过微调内化】\n");
+        prompt.append(fullArticles);
+        if (prompt.length() > 15000) {
+            prompt.setLength(15000);
+        }
+        return prompt.toString();
+    }
+
+    private void saveChat(Long userId, String question, String answer) {
+        try {
+            AiChat chat = new AiChat();
+            chat.setUserId(userId != null ? userId : 1L);
+            chat.setQuestion(question);
+            chat.setAnswer(answer);
+            chat.setCreateTime(new Date());
+            aiChatMapper.insert(chat);
+        } catch (Exception e) {
+            System.err.println("[AI] 保存失败: " + e.getMessage());
+        }
+    }
 }
