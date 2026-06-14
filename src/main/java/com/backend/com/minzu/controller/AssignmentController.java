@@ -17,7 +17,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
+import java.util.*;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -377,6 +377,61 @@ public class AssignmentController {
         } catch (Exception e) {
             e.printStackTrace();
             return Result.error("获取题目失败: " + e.getMessage());
+        }
+    }
+
+    /** 给作业添加题目（支持从题库随机抽取或手动添加） */
+    @PostMapping("/{id}/questions")
+    public Result<String> addQuestionToAssignment(@PathVariable Long id, @RequestBody Map<String, Object> params) {
+        try {
+            String type = (String) params.getOrDefault("type", "manual");
+            if ("bank_random".equals(type)) {
+                int count = params.get("count") != null ? Integer.parseInt(params.get("count").toString()) : 5;
+                // 从题库随机抽取
+                List<Question> allQuestions = questionMapper.selectList(null);
+                if (allQuestions.isEmpty()) return Result.error("题库为空");
+                Collections.shuffle(allQuestions);
+                int max = Math.min(count, allQuestions.size());
+                // 获取当前已有题目数量作为排序偏移
+                int offset = assignmentQuestionMapper.selectCount(
+                        new LambdaQueryWrapper<AssignmentQuestion>().eq(AssignmentQuestion::getAssignmentId, id)).intValue();
+                for (int i = 0; i < max; i++) {
+                    AssignmentQuestion aq = new AssignmentQuestion();
+                    aq.setAssignmentId(id);
+                    aq.setQuestionId(allQuestions.get(i).getId());
+                    aq.setSortOrder(offset + i + 1);
+                    assignmentQuestionMapper.insert(aq);
+                }
+                // 更新作业题目数
+                Assignment assignment = assignmentMapper.selectById(id);
+                if (assignment != null) {
+                    int total = assignmentQuestionMapper.selectCount(
+                            new LambdaQueryWrapper<AssignmentQuestion>().eq(AssignmentQuestion::getAssignmentId, id)).intValue();
+                    assignment.setQuestionCount(total);
+                    assignmentMapper.updateById(assignment);
+                }
+                return Result.success("已从题库随机添加" + max + "道题");
+            }
+            // 手动添加
+            String questionText = (String) params.getOrDefault("questionText", "");
+            if (questionText.isEmpty()) return Result.error("题目内容不能为空");
+            Question q = new Question();
+            q.setTitle(questionText);
+            q.setType(params.get("type") != null ? Integer.parseInt(params.get("type").toString()) : 1);
+            q.setOptions((String) params.getOrDefault("options", "[]"));
+            q.setAnswer((String) params.getOrDefault("answer", ""));
+            questionMapper.insert(q);
+            int offset = assignmentQuestionMapper.selectCount(
+                    new LambdaQueryWrapper<AssignmentQuestion>().eq(AssignmentQuestion::getAssignmentId, id)).intValue();
+            AssignmentQuestion aq = new AssignmentQuestion();
+            aq.setAssignmentId(id);
+            aq.setQuestionId(q.getId());
+            aq.setSortOrder(offset + 1);
+            assignmentQuestionMapper.insert(aq);
+            return Result.success("题目已添加");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Result.error("添加失败: " + e.getMessage());
         }
     }
 }

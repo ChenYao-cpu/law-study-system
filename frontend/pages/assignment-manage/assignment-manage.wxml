@@ -54,7 +54,7 @@
                     <view class="q-item" wx:for="{{cardQuestions}}" wx:key="questionId" wx:for-index="qi">
                         <text class="q-index">{{qi + 1}}.</text>
                         <text class="q-text">{{item.questionText || item.title || '题目'}}</text>
-                        <text class="q-delete" bindtap="deleteCardQuestion" data-id="{{item.id}}" data-index="{{qi}}">删除</text>
+                        <text class="q-delete" bindtap="deleteCardQuestion" data-id="{{item.id}}" data-qid="{{cardQuestions[qi].questionId}}" data-index="{{qi}}">删除</text>
                     </view>
                 </view>
                 <view class="q-empty" wx:else><text>暂无题目，点击上方添加</text></view>

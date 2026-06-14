@@ -167,39 +167,90 @@ Page({
         }
     },
 
-    // 删除展开中的题目
-    deleteCardQuestion(e) {
+    // 删除展开中的题目（不需要重新审核）
+    async deleteCardQuestion(e) {
         const index = e.currentTarget.dataset.index
+        const qid = e.currentTarget.dataset.qid
+        const aid = e.currentTarget.dataset.id
+        if (qid) {
+            try { await api.removeQuestionFromAssignment(aid, qid) } catch (e) {}
+        }
         const questions = [...this.data.cardQuestions]
         questions.splice(index, 1)
         this.setData({ cardQuestions: questions })
+        wx.showToast({ title: '已删除', icon: 'success' })
     },
 
-    // 跳转添加题目
+    // 添加题目弹窗
     goAddQuestion(e) {
         const id = e.currentTarget.dataset.id
-        wx.navigateTo({ url: `/pages/question-edit/question-edit?assignmentId=${id}&index=new` })
-        // 返回后刷新题目
         const that = this
-        this._refreshId = id
+        wx.showActionSheet({
+            itemList: ['从题库随机选取', '手动创建题目'],
+            success(res) {
+                if (res.tapIndex === 0) {
+                    that.bankPickQuestions(id)
+                } else {
+                    wx.navigateTo({ url: `/pages/question-edit/question-edit?assignmentId=${id}&index=new` })
+                }
+            }
+        })
     },
 
-    // 保存题目变更到后端
+    // 从题库随机选题
+    bankPickQuestions(assignmentId) {
+        wx.showModal({
+            title: '从题库选题',
+            editable: true,
+            placeholderText: '输入要抽取的题目数量',
+            success: async (res) => {
+                if (res.confirm && res.content) {
+                    const count = parseInt(res.content)
+                    if (isNaN(count) || count <= 0) {
+                        wx.showToast({ title: '请输入有效数量', icon: 'none' })
+                        return
+                    }
+                    wx.showLoading({ title: '抽取中...' })
+                    try {
+                        // 调题库随机抽取
+                        await api.addQuestionToAssignment(assignmentId, { type: 'bank_random', count })
+                        wx.hideLoading()
+                        wx.showToast({ title: `已添加${count}题`, icon: 'success' })
+                        // 添加题目后回到草稿状态
+                        await this.resetToDraft(assignmentId)
+                        this.loadCardQuestions(assignmentId)
+                        this.loadAssignments()
+                    } catch (e) {
+                        wx.hideLoading()
+                        wx.showToast({ title: '抽取失败', icon: 'none' })
+                    }
+                }
+            }
+        })
+    },
+
+    // 添加题目后重置为草稿
+    async resetToDraft(id) {
+        try {
+            await api.updateAssignment(id, { reviewStatus: 'draft' })
+        } catch (e) {}
+    },
+
+    // 保存题目变更（添加新题后需要重新审核）
     async saveCardQuestions(e) {
         const id = e.currentTarget.dataset.id
         wx.showLoading({ title: '保存中...' })
         try {
-            // 删除旧题目再重新保存
             const questions = this.data.cardQuestions.map((q, i) => ({
                 questionId: q.questionId || (Date.now() + i),
                 questionText: q.questionText,
                 sortOrder: i + 1
             }))
-            // 更新作业题目
-            await api.updateAssignment(id, { questions })
+            await api.updateAssignment(id, { questions, reviewStatus: 'draft' })
             wx.hideLoading()
-            wx.showToast({ title: '已保存', icon: 'success' })
+            wx.showToast({ title: '已保存，需重新送审', icon: 'success' })
             this.loadAssignments()
+            this.setData({ expandedId: null })
         } catch (e) {
             wx.hideLoading()
             wx.showToast({ title: '保存失败', icon: 'none' })
